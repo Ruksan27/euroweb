@@ -160,8 +160,22 @@ const CVBuilder = ({ initialData }) => {
       window.URL.revokeObjectURL(url);
       toast.success(`${type.toUpperCase()} downloaded! ✅`, { id: toastId });
     } catch (error) {
-      console.error(error);
-      toast.error(`Failed to download ${type.toUpperCase()}`, { id: toastId });
+      console.error('Download error:', error);
+      let errMsg = 'Unknown error';
+      if (error.response) {
+        // Since responseType is blob, error.response.data is a Blob!
+        // We need to read it as text to see the JSON error message
+        try {
+          const text = await error.response.data.text();
+          const parsed = JSON.parse(text);
+          errMsg = parsed.error || parsed.details || text;
+        } catch (e) {
+          errMsg = `Status ${error.response.status}`;
+        }
+      } else {
+        errMsg = error.message;
+      }
+      toast.error(`Failed to download ${type.toUpperCase()}: ${errMsg}`, { id: toastId });
     }
   };
 
