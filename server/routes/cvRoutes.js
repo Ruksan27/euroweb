@@ -4,6 +4,7 @@ const CV = require('../models/CV');
 const puppeteer = require('puppeteer');
 const { generateHTML } = require('../utils/pdfTemplate');
 const { uploadMemory, uploadToCloudinary } = require('../config/cloudinary');
+const HTMLtoDOCX = require('html-to-docx');
 
 // Helper: sanitize name for Cloudinary folder
 const toFolderName = (name) =>
@@ -107,7 +108,7 @@ router.get('/generate-pdf/:id', async (req, res) => {
     if (!cv) return res.status(404).json({ error: 'CV not found' });
 
     const browser = await puppeteer.launch({
-      headless: 'new',
+      headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
@@ -135,7 +136,7 @@ router.get('/generate-jpg/:id', async (req, res) => {
     if (!cv) return res.status(404).json({ error: 'CV not found' });
 
     const browser = await puppeteer.launch({
-      headless: 'new',
+      headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
@@ -154,29 +155,26 @@ router.get('/generate-jpg/:id', async (req, res) => {
   }
 });
 
-// ─── Generate PNG ──────────────────────────────────────────────────────────────
-router.get('/generate-png/:id', async (req, res) => {
+// ─── Generate DOCX ──────────────────────────────────────────────────────────────
+router.get('/generate-docx/:id', async (req, res) => {
   try {
     const cv = await CV.findById(req.params.id).lean();
     if (!cv) return res.status(404).json({ error: 'CV not found' });
 
-    const browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    const htmlString = generateHTML(cv);
+    const fileBuffer = await HTMLtoDOCX(htmlString, null, {
+      table: { row: { cantSplit: true } },
+      footer: true,
+      pageNumber: true,
     });
-    const page = await browser.newPage();
-    await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 2 });
-    await page.setContent(generateHTML(cv), { waitUntil: 'networkidle0' });
-    const imgBuffer = await page.screenshot({ type: 'png', fullPage: true });
-    await browser.close();
 
     const name = (cv.personalInfo?.fullName || 'CV').replace(/\s+/g, '_');
-    res.setHeader('Content-Disposition', `attachment; filename="${name}_Europass.png"`);
-    res.contentType('image/png');
-    res.send(imgBuffer);
+    res.setHeader('Content-Disposition', `attachment; filename="${name}_Europass.docx"`);
+    res.contentType('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.send(fileBuffer);
   } catch (error) {
-    console.error('PNG error:', error.message);
-    res.status(500).json({ error: 'Failed to generate PNG' });
+    console.error('DOCX error:', error.message);
+    res.status(500).json({ error: 'Failed to generate DOCX' });
   }
 });
 

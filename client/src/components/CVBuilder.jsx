@@ -500,8 +500,8 @@ const CVBuilder = ({ initialData }) => {
              <button onClick={() => downloadFile('jpg')} className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl font-bold flex justify-center items-center gap-2 transition text-sm">
                 <LucideDownload size={16} /> JPG
              </button>
-             <button onClick={() => downloadFile('png')} className="flex-1 bg-violet-600 hover:bg-violet-500 text-white py-2.5 rounded-xl font-bold flex justify-center items-center gap-2 transition text-sm">
-                <LucideDownload size={16} /> PNG
+             <button onClick={() => downloadFile('docx')} className="flex-1 bg-violet-600 hover:bg-violet-500 text-white py-2.5 rounded-xl font-bold flex justify-center items-center gap-2 transition text-sm">
+                <LucideDownload size={16} /> Word
              </button>
           </div>
 
@@ -683,7 +683,7 @@ const CVBuilder = ({ initialData }) => {
                 </>
              )}
           </div>
-          <p className="text-center text-slate-500 text-xs mt-2">{lastSavedId ? '✅ Saved — ready to download' : 'Fill form → Save → Download PDF/JPG'}</p>
+          <p className="text-center text-slate-500 text-xs mt-2">{lastSavedId ? '✅ Saved — ready to download' : 'Fill form → Save → Download PDF/JPG/Word'}</p>
         </div>
 
       </div>
@@ -699,6 +699,9 @@ const CVBuilder = ({ initialData }) => {
         </button>
         <button onClick={() => downloadFile('jpg')} className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition text-sm">
           <LucideDownload size={16} /> JPG
+        </button>
+        <button onClick={() => downloadFile('docx')} className="flex-1 bg-violet-600 hover:bg-violet-500 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition text-sm">
+          <LucideDownload size={16} /> Word
         </button>
       </div>
     </div>
