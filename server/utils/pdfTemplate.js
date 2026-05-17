@@ -62,7 +62,7 @@ const generateHTML = (data) => {
       .edu-meta span, .exp-meta span { font-weight: 700; color: #444; }
       
       .skills-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
-      .skill-tag { background: #f1f3f9; color: #34495e; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 500; border: 1px solid #e2e8f0; }
+      .skill-tag { background: #f1f3f9; color: #34495e; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 500; border: 1px solid #e2e8f0; margin-right: 6px; margin-bottom: 6px; display: inline-block; }
     `;
 
     bodyContent = `
