@@ -205,7 +205,7 @@ const CVBuilder = ({ initialData }) => {
                     : cvData.photoUrl ? <img src={cvData.photoUrl} alt="Profile" className="w-full h-full object-cover" /> 
                     : <LucideUser size={40} className="text-white/30" />}
                 </div>
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold ${getPhotoShapeClass(cvData.photoShape)}">
+                <div className={`absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold ${getPhotoShapeClass(cvData.photoShape)}`}>
                   CHANGE
                 </div>
               </div>
@@ -509,7 +509,7 @@ const CVBuilder = ({ initialData }) => {
                   {/* Header */}
                   <div className="p-5 text-slate-800 flex justify-between items-start border-b border-gray-100 gap-4">
                      <div className="flex gap-4 items-center">
-                        <div className="w-16 h-16 rounded-full border-2 flex items-center justify-center overflow-hidden shrink-0" style={{ borderColor: cvData.themeColor || '#0e4a8e' }}>
+                        <div className={`w-16 h-16 border-2 flex items-center justify-center overflow-hidden shrink-0 ${getPhotoShapeClass(cvData.photoShape)}`} style={{ borderColor: cvData.themeColor || '#0e4a8e' }}>
                            {cvData.photoUrl ? <img src={cvData.photoUrl} className="w-full h-full object-cover"/> : <LucideUser size={26} className="text-gray-400"/>}
                         </div>
                         <div className="min-w-0">

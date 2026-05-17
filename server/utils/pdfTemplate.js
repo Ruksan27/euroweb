@@ -28,7 +28,7 @@ const generateHTML = (data) => {
       .europass-top-bar { height: 12px; background-color: ${themeColor}; margin-bottom: 25px; }
       .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 0 40px; margin-bottom: 25px; }
       .header-left { display: flex; gap: 24px; align-items: center; }
-      .photo-wrap img, .photo-wrap .no-photo { width: 120px; height: 120px; object-fit: cover; border-radius: 50% !important; border: 3px solid ${themeColor}; }
+      .photo-wrap img, .photo-wrap .no-photo { width: 120px; height: 120px; object-fit: cover; border: 3px solid ${themeColor}; }
       .photo-wrap .no-photo { background: #eee; color: #888; display: flex; align-items: center; justify-content: center; font-size: 32px; }
       .header-info { color: #222; }
       .header-info h1 { font-size: 26px; font-weight: 700; color: ${themeColor}; margin: 0 0 6px 0; letter-spacing: -0.5px; }
