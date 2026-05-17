@@ -5,7 +5,7 @@ import {
   LucideSearch, LucideChevronDown, LucideChevronUp,
   LucideMail, LucidePhone, LucideMapPin, LucideCalendar,
   LucideBriefcase, LucideGraduationCap, LucideCode2,
-  LucideGlobe, LucideLink, LucideLoader2, LucideAward
+  LucideGlobe, LucideLink, LucideLoader2, LucideAward, LucideHome
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { API } from '../config/api';
@@ -85,6 +85,14 @@ export function AdminLogin({ onLogin }) {
             >
               {loading ? <LucideLoader2 size={20} className="animate-spin" /> : <LucideShield size={20} />}
               {loading ? 'Logging in...' : 'Login to Admin'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { window.location.hash = ''; window.location.reload(); }}
+              className="w-full mt-3 bg-white/5 hover:bg-white/10 text-slate-300 font-medium py-3 rounded-xl transition-all border border-white/10 flex items-center justify-center gap-2"
+            >
+              <LucideHome size={18} />
+              Back to Home
             </button>
           </form>
 
@@ -415,6 +423,14 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
+            <button
+              type="button"
+              onClick={() => { window.location.hash = ''; window.location.reload(); }}
+              className="flex items-center gap-1.5 text-slate-400 hover:text-indigo-400 transition px-2 sm:px-3 py-2 rounded-xl hover:bg-indigo-500/10"
+            >
+              <LucideHome size={16} />
+              <span className="hidden sm:inline text-sm">Home</span>
+            </button>
             <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-sm text-slate-300">
               <span className="text-indigo-400 font-bold">{cvs.length}</span>
               <span className="hidden sm:inline"> Total CVs</span>
