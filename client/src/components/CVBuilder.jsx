@@ -139,9 +139,10 @@ const CVBuilder = ({ initialData }) => {
     const id = lastSavedId || cvData._id;
     if (!id) { toast.error('Save the CV first before downloading'); return; }
     const url = `${API.cv}/generate-${type}/${id}`;
+    const name = (cvData.personalInfo?.fullName || 'CV').trim().replace(/\s+/g, '_');
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Europass_CV.${type}`);
+    link.setAttribute('download', `${name}_Europass.${type}`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
