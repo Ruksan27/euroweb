@@ -112,10 +112,11 @@ router.get('/generate-pdf/:id', async (req, res) => {
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
-    await page.setContent(generateHTML(cv), { waitUntil: 'networkidle0' });
+    await page.setContent(generateHTML(cv), { waitUntil: 'networkidle2', timeout: 60000 });
     const pdfBuffer = await page.pdf({
       format: 'A4', printBackground: true,
-      margin: { top: '0', right: '0', bottom: '0', left: '0' }
+      margin: { top: '0', right: '0', bottom: '0', left: '0' },
+      timeout: 60000
     });
     await browser.close();
 
@@ -124,8 +125,8 @@ router.get('/generate-pdf/:id', async (req, res) => {
     res.contentType('application/pdf');
     res.send(pdfBuffer);
   } catch (error) {
-    console.error('PDF error:', error.message);
-    res.status(500).json({ error: 'Failed to generate PDF' });
+    console.error('PDF error:', error);
+    res.status(500).json({ error: 'Failed to generate PDF', details: error.message });
   }
 });
 
@@ -140,8 +141,8 @@ router.get('/generate-jpg/:id', async (req, res) => {
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
-    await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 2 });
-    await page.setContent(generateHTML(cv), { waitUntil: 'networkidle0' });
+    // Use networkidle2 and increase timeout to prevent hanging on external images
+    await page.setContent(generateHTML(cv), { waitUntil: 'networkidle2', timeout: 60000 });
     const imgBuffer = await page.screenshot({ type: 'jpeg', quality: 95, fullPage: true });
     await browser.close();
 
@@ -150,8 +151,8 @@ router.get('/generate-jpg/:id', async (req, res) => {
     res.contentType('image/jpeg');
     res.send(imgBuffer);
   } catch (error) {
-    console.error('JPG error:', error.message);
-    res.status(500).json({ error: 'Failed to generate JPG' });
+    console.error('JPG error:', error);
+    res.status(500).json({ error: 'Failed to generate JPG', details: error.message });
   }
 });
 
