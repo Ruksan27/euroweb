@@ -135,48 +135,11 @@ const CVBuilder = ({ initialData }) => {
     }
   };
 
-  const downloadFile = async (type) => {
+  const downloadFile = (type) => {
     const id = lastSavedId || cvData._id;
     if (!id) { toast.error('Save the CV first before downloading'); return; }
-    
-    const toastId = toast.loading(`Generating ${type.toUpperCase()}...`);
-    try {
-      const response = await axios.get(`${API.cv}/generate-${type}/${id}`, {
-        responseType: 'blob'
-      });
-      
-      const blob = new Blob([response.data], { type: response.headers['content-type'] });
-      const url = window.URL.createObjectURL(blob);
-      const name = (cvData.personalInfo?.fullName || 'CV').trim().replace(/\s+/g, '_');
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${name}_Europass.${type}`);
-      document.body.appendChild(link);
-      link.click();
-      
-      // cleanup
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      toast.success(`${type.toUpperCase()} downloaded! ✅`, { id: toastId });
-    } catch (error) {
-      console.error('Download error:', error);
-      let errMsg = 'Unknown error';
-      if (error.response) {
-        // Since responseType is blob, error.response.data is a Blob!
-        // We need to read it as text to see the JSON error message
-        try {
-          const text = await error.response.data.text();
-          const parsed = JSON.parse(text);
-          errMsg = parsed.error || parsed.details || text;
-        } catch (e) {
-          errMsg = `Status ${error.response.status}`;
-        }
-      } else {
-        errMsg = error.message;
-      }
-      toast.error(`Failed to download ${type.toUpperCase()}: ${errMsg}`, { id: toastId });
-    }
+    // Use relative URL — Vite proxy forwards /api/* to backend (same-origin = proper download)
+    window.open(`/api/cv/generate-${type}/${id}`, '_blank');
   };
 
   // Helpers
