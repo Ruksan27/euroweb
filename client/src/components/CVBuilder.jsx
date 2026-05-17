@@ -135,17 +135,34 @@ const CVBuilder = ({ initialData }) => {
     }
   };
 
-  const downloadFile = (type) => {
+  const downloadFile = async (type) => {
     const id = lastSavedId || cvData._id;
     if (!id) { toast.error('Save the CV first before downloading'); return; }
-    const url = `${API.cv}/generate-${type}/${id}`;
-    const name = (cvData.personalInfo?.fullName || 'CV').trim().replace(/\s+/g, '_');
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `${name}_Europass.${type}`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    
+    const toastId = toast.loading(`Generating ${type.toUpperCase()}...`);
+    try {
+      const response = await axios.get(`${API.cv}/generate-${type}/${id}`, {
+        responseType: 'blob'
+      });
+      
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+      const url = window.URL.createObjectURL(blob);
+      const name = (cvData.personalInfo?.fullName || 'CV').trim().replace(/\s+/g, '_');
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${name}_Europass.${type}`);
+      document.body.appendChild(link);
+      link.click();
+      
+      // cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success(`${type.toUpperCase()} downloaded! ✅`, { id: toastId });
+    } catch (error) {
+      console.error(error);
+      toast.error(`Failed to download ${type.toUpperCase()}`, { id: toastId });
+    }
   };
 
   // Helpers
