@@ -135,11 +135,39 @@ const CVBuilder = ({ initialData }) => {
     }
   };
 
-  const downloadFile = (type) => {
+  const downloadFile = async (type) => {
     const id = lastSavedId || cvData._id;
     if (!id) { toast.error('Save the CV first before downloading'); return; }
-    // Use relative URL — Vite proxy forwards /api/* to backend (same-origin = proper download)
-    window.open(`/api/cv/generate-${type}/${id}`, '_blank');
+
+    const toastId = toast.loading(`Generating ${type.toUpperCase()}...`);
+    try {
+      const response = await axios.get(`/api/cv/generate-${type}/${id}`, {
+        responseType: 'blob',
+      });
+
+      // Extract filename from Content-Disposition (exposed via CORS)
+      const disposition = response.headers['content-disposition'] || '';
+      let filename = `Europass_CV.${type}`;
+      const matchUtf8 = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+      const matchPlain = disposition.match(/filename="([^"]+)"/i);
+      if (matchUtf8) filename = decodeURIComponent(matchUtf8[1]);
+      else if (matchPlain) filename = matchPlain[1];
+
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      // Delay revoke so browser has time to start the download
+      setTimeout(() => window.URL.revokeObjectURL(url), 5000);
+      toast.success(`${type.toUpperCase()} downloaded! ✅`, { id: toastId });
+    } catch (err) {
+      console.error('Download error:', err);
+      toast.error(`Failed to download ${type.toUpperCase()}`, { id: toastId });
+    }
   };
 
   // Helpers

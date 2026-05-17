@@ -121,8 +121,10 @@ router.get('/generate-pdf/:id', async (req, res) => {
     await browser.close();
 
     const name = (cv.personalInfo?.fullName || 'CV').replace(/\s+/g, '_');
-    res.setHeader('Content-Disposition', `attachment; filename="${name}_Europass.pdf"`);
-    res.contentType('application/pdf');
+    const pdfFilename = `${name}_Europass.pdf`;
+    res.setHeader('Content-Disposition', `attachment; filename="${pdfFilename}"; filename*=UTF-8''${encodeURIComponent(pdfFilename)}`);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     res.send(pdfBuffer);
   } catch (error) {
     console.error('PDF error:', error);
@@ -147,8 +149,10 @@ router.get('/generate-jpg/:id', async (req, res) => {
     await browser.close();
 
     const name = (cv.personalInfo?.fullName || 'CV').replace(/\s+/g, '_');
-    res.setHeader('Content-Disposition', `attachment; filename="${name}_Europass.jpg"`);
-    res.contentType('image/jpeg');
+    const jpgFilename = `${name}_Europass.jpg`;
+    res.setHeader('Content-Disposition', `attachment; filename="${jpgFilename}"; filename*=UTF-8''${encodeURIComponent(jpgFilename)}`);
+    res.setHeader('Content-Type', 'image/jpeg');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     res.send(imgBuffer);
   } catch (error) {
     console.error('JPG error:', error);
@@ -170,8 +174,10 @@ router.get('/generate-docx/:id', async (req, res) => {
     });
 
     const name = (cv.personalInfo?.fullName || 'CV').replace(/\s+/g, '_');
-    res.setHeader('Content-Disposition', `attachment; filename="${name}_Europass.docx"`);
-    res.contentType('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    const docxFilename = `${name}_Europass.docx`;
+    res.setHeader('Content-Disposition', `attachment; filename="${docxFilename}"; filename*=UTF-8''${encodeURIComponent(docxFilename)}`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     res.send(fileBuffer);
   } catch (error) {
     console.error('DOCX error:', error.message);
