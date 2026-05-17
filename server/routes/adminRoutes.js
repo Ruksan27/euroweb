@@ -35,6 +35,7 @@ router.post('/login', (req, res) => {
 const verifyAdmin = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log('[-] verifyAdmin failed: No token provided');
     return res.status(401).json({ error: 'No token provided' });
   }
   const token = authHeader.slice(7);
@@ -44,6 +45,7 @@ const verifyAdmin = (req, res, next) => {
     req.admin = decoded;
     next();
   } catch (err) {
+    console.log('[-] verifyAdmin failed:', err.message);
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
 };
@@ -59,8 +61,10 @@ router.get('/cvs', verifyAdmin, async (req, res) => {
       CV.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       CV.countDocuments()
     ]);
+    console.log(`[+] fetchCVs successful: found ${cvs.length} CVs, total ${total}`);
     res.json({ cvs, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
+    console.error('[-] fetchCVs failed:', error);
     res.status(500).json({ error: 'Failed to fetch CVs' });
   }
 });

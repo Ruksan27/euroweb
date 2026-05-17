@@ -334,12 +334,26 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
       const res = await fetch(`${API.admin}/cvs`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem('admin_token');
+        toast.error('Session expired. Please login again.');
+        onLogout();
+        return;
+      }
+
+      if (!res.ok) {
+        toast.error('Failed to load CVs from server');
+        return;
+      }
+
       const data = await res.json();
       if (data.cvs) setCvs(data.cvs);
       else if (Array.isArray(data)) setCvs(data);
-      else toast.error('Failed to load CVs');
-    } catch {
-      toast.error('Server error');
+      else toast.error('Failed to parse CVs data');
+    } catch (error) {
+      console.error('Error fetching CVs:', error);
+      toast.error('Server connection error');
     } finally {
       setLoading(false);
     }
@@ -351,10 +365,20 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
     if (!window.confirm('Are you sure you want to delete this CV?')) return;
     setDeletingId(id);
     try {
-      await fetch(`${API.admin}/cvs/${id}`, {
+      const res = await fetch(`${API.admin}/cvs/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem('admin_token');
+        toast.error('Session expired. Please login again.');
+        onLogout();
+        return;
+      }
+      if (!res.ok) {
+        toast.error('Failed to delete CV');
+        return;
+      }
       setCvs(prev => prev.filter(c => c._id !== id));
       toast.success('CV deleted successfully');
     } catch {
