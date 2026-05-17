@@ -22,3 +22,11 @@ client/dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Puppeteer Chrome cache
+.cache/
+server/.cache/
+
+# Test files
+server/fixCVBuilder.js
+server/test*.js
