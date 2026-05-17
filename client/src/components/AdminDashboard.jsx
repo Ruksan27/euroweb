@@ -88,9 +88,7 @@ export function AdminLogin({ onLogin }) {
             </button>
           </form>
 
-          <p className="text-center text-slate-600 text-xs mt-6">
-            Default: <span className="text-slate-400">admin / admin123</span>
-          </p>
+
         </div>
       </div>
     </div>
