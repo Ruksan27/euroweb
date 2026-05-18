@@ -1,10 +1,10 @@
-import React, { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { 
   LucideUpload, LucideSparkles, LucidePlus, LucideTrash, LucideDownload, 
   LucideBriefcase, LucideGraduationCap, LucideWrench, LucideUser, LucideImage,
-  LucideFileText, LucideLanguages, LucideAward, LucideLoader2, LucideSave, LucideX
+  LucideFileText, LucideLanguages, LucideAward, LucideLoader2, LucideSave
 } from 'lucide-react';
 import { API } from '../config/api';
 
@@ -110,7 +110,7 @@ const CVBuilder = ({ initialData }) => {
         documents: [...(prev.documents || []), ...(aiData.documents || [])] 
       }));
       toast.success('Data extracted successfully.', { id: toastId });
-    } catch (error) {
+    } catch {
       toast.error('AI Extraction failed.', { id: toastId });
     } finally {
       setLoading(false);
@@ -135,31 +135,34 @@ const CVBuilder = ({ initialData }) => {
     }
   };
 
-  const downloadFile = async (type) => {
+  const downloadFile = (type) => {
     const id = lastSavedId || cvData._id;
     if (!id) { toast.error('Save the CV first before downloading'); return; }
 
-    const toastId = toast.loading(`Generating ${type.toUpperCase()}...`);
-    try {
-      // Use direct browser download to rely on the backend's Content-Disposition header
-      // This prevents the browser from saving the file as a Blob UUID.
-      const downloadUrl = `${API.cv}/generate-${type}/${id}`;
-      
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = downloadUrl;
-      // We set target to blank so if the server errors, it doesn't navigate away from the builder
-      a.target = '_blank'; 
-      a.download = `Europass_CV.${type}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      toast.success(`${type.toUpperCase()} download started! ✅`, { id: toastId });
-    } catch (err) {
-      console.error('Download error:', err);
-      toast.error(`Failed to trigger ${type.toUpperCase()} download: ${err.message}`, { id: toastId });
-    }
+    const toastId = toast.loading(`Downloading ${type.toUpperCase()}...`);
+    const fileName = (cvData.personalInfo?.fullName || 'Europass_CV').replace(/\s+/g, '_');
+    
+    // Using the requested fetch -> blob -> createObjectURL structure
+    fetch(`${API.cv}/generate-${type}/${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Download failed');
+        return res.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${fileName}.${type}`; // clean name as requested
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        toast.success(`${type.toUpperCase()} downloaded successfully!`, { id: toastId });
+      })
+      .catch(err => {
+        console.error(err);
+        toast.error(`Failed to download ${type.toUpperCase()}`, { id: toastId });
+      });
   };
 
   // Helpers
