@@ -11,7 +11,7 @@ const extractDataFromDocument = async (req, res) => {
       return res.status(400).json({ error: "No files uploaded" });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
       You are an expert HR data extractor. I have provided one or more files (these could be CVs, ID cards, education certificates, etc.).
