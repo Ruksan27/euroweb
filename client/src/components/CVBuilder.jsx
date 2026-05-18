@@ -145,75 +145,20 @@ const CVBuilder = ({ initialData }) => {
     }
 
     try {
-      const toastId = toast.loading(`Preparing ${type.toUpperCase()} download...`);
-
-      const fileName = (cvData.personalInfo?.fullName || 'Europass_CV')
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '_');
-
-      // यदि localStorage मा token छ भने include गर्ने
-      const token = localStorage.getItem('token');
-
-      const response = await fetch(`${API.cv}/generate-${type}/${id}`, {
-        method: 'GET',
-        headers: {
-          ...(token && {
-            Authorization: `Bearer ${token}`
-          })
-        }
-      });
-
-      // HTTP error check
-      if (!response.ok) {
-        let errorMessage = `Server returned ${response.status}`;
-
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch {
-          // ignore if not JSON
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      // Blob conversion
-      const blob = await response.blob();
-
-      // Empty file check
-      if (blob.size === 0) {
-        throw new Error('Generated file is empty');
-      }
-
-      // Create temporary URL
-      const url = window.URL.createObjectURL(blob);
-
-      // Create hidden link
+      const downloadUrl = `${API.cv}/generate-${type}/${id}`;
+      
       const link = document.createElement('a');
-      link.href = url;
-      link.download = `${fileName}.${type}`;
+      link.href = downloadUrl;
+      link.setAttribute('download', '');
       link.style.display = 'none';
-
-      // Append → Click → Remove
       document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
 
-      // Cleanup
-      setTimeout(() => {
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      }, 100);
-
-      toast.success(
-        `${type.toUpperCase()} downloaded successfully!`,
-        { id: toastId }
-      );
-
+      toast.success(`Starting your ${type.toUpperCase()} download... 🚀`);
     } catch (error) {
       console.error('Download Error:', error);
-      toast.error(
-        error.message || `Failed to download ${type.toUpperCase()}`
-      );
+      toast.error(`Failed to download ${type.toUpperCase()}`);
     }
   };
 

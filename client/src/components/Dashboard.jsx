@@ -25,7 +25,15 @@ const Dashboard = () => {
   };
 
   const handleDownload = (id) => {
-    window.open(`${API.cv}/generate-pdf/${id}`, '_blank');
+    const downloadUrl = `${API.cv}/generate-pdf/${id}`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.setAttribute('download', '');
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Starting your PDF download... 🚀');
   };
 
   const handleDelete = async (id) => {
