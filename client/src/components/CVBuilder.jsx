@@ -110,8 +110,9 @@ const CVBuilder = ({ initialData }) => {
         documents: [...(prev.documents || []), ...(aiData.documents || [])]
       }));
       toast.success('Data extracted successfully.', { id: toastId });
-    } catch {
-      toast.error('AI Extraction failed.', { id: toastId });
+    } catch (error) {
+      console.error('AI Extraction Error Details:', error);
+      toast.error(`AI Extraction failed: ${error.response?.data?.error || error.message}`, { id: toastId });
     } finally {
       setLoading(false);
     }
