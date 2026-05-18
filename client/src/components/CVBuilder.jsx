@@ -141,32 +141,24 @@ const CVBuilder = ({ initialData }) => {
 
     const toastId = toast.loading(`Generating ${type.toUpperCase()}...`);
     try {
-      const response = await axios.get(`/api/cv/generate-${type}/${id}`, {
-        responseType: 'blob',
-      });
+      // Use direct browser download to rely on the backend's Content-Disposition header
+      // This prevents the browser from saving the file as a Blob UUID.
+      const downloadUrl = `${API.cv}/generate-${type}/${id}`;
+      
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = downloadUrl;
+      // We set target to blank so if the server errors, it doesn't navigate away from the builder
+      a.target = '_blank'; 
+      a.download = `Europass_CV.${type}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
 
-      // Extract filename from Content-Disposition (exposed via CORS)
-      const disposition = response.headers['content-disposition'] || '';
-      let filename = `Europass_CV.${type}`;
-      const matchUtf8 = disposition.match(/filename\*=UTF-8''([^;]+)/i);
-      const matchPlain = disposition.match(/filename="([^"]+)"/i);
-      if (matchUtf8) filename = decodeURIComponent(matchUtf8[1]);
-      else if (matchPlain) filename = matchPlain[1];
-
-      const blob = new Blob([response.data], { type: response.headers['content-type'] });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      // Delay revoke so browser has time to start the download
-      setTimeout(() => window.URL.revokeObjectURL(url), 5000);
-      toast.success(`${type.toUpperCase()} downloaded! ✅`, { id: toastId });
+      toast.success(`${type.toUpperCase()} download started! ✅`, { id: toastId });
     } catch (err) {
       console.error('Download error:', err);
-      toast.error(`Failed to download ${type.toUpperCase()}`, { id: toastId });
+      toast.error(`Failed to trigger ${type.toUpperCase()} download: ${err.message}`, { id: toastId });
     }
   };
 
