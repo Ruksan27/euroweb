@@ -1,34 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
-import { LucideFileText, LucideZap, LucideDownload, LucideLayout, LucideLayoutDashboard, LucideShield, LucideLogOut, LucideUser } from 'lucide-react'
+import { LucideFileText, LucideZap, LucideDownload, LucideLayout, LucideLayoutDashboard, LucideShield } from 'lucide-react'
 import CVBuilder from './components/CVBuilder'
 import Dashboard from './components/Dashboard'
 import AdminDashboard from './components/AdminDashboard'
 import { AdminLogin } from './components/AdminDashboard'
-import AuthModal from './components/AuthModal'
 
 function App() {
   const [view, setView] = useState('landing')
   const [adminToken, setAdminToken] = useState(() => localStorage.getItem('admin_token') || null)
   const [editingCV, setEditingCV] = useState(null)
-  
-  // User auth state
-  const [user, setUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem('user');
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  })
-  const [authModalOpen, setAuthModalOpen] = useState(false)
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    setView('landing');
-  };
 
   // Admin route check
   if (window.location.hash === '#admin' || view === 'admin-login' || view === 'admin') {
@@ -64,52 +45,23 @@ function App() {
           </div>
           <div className="flex items-center gap-2 sm:gap-6">
             <button 
+              onClick={() => setView('dashboard')} 
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${view === 'dashboard' ? 'bg-primary-600/20 text-primary-400' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <LucideLayoutDashboard size={16} />
+              <span className="hidden sm:inline">Dashboard</span>
+            </button>
+            <button 
               onClick={() => { setEditingCV(null); setView('builder') }} 
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${view === 'builder' ? 'bg-primary-600/20 text-primary-400' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
             >
               <LucideLayout size={16} />
               <span className="hidden sm:inline">Builder</span>
             </button>
-
-            {user ? (
-              <>
-                <button 
-                  onClick={() => setView('dashboard')} 
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${view === 'dashboard' ? 'bg-primary-600/20 text-primary-400' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
-                >
-                  <LucideLayoutDashboard size={16} />
-                  <span>My CVs</span>
-                </button>
-                <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-lg text-sm text-slate-300">
-                  <LucideUser size={14} className="text-primary-400" />
-                  <span>{user.fullName}</span>
-                </div>
-                <button 
-                  onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition"
-                >
-                  <LucideLogOut size={16} />
-                  <span className="hidden sm:inline">Logout</span>
-                </button>
-              </>
-            ) : (
-              <button 
-                onClick={() => setAuthModalOpen(true)}
-                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
-              >
-                Sign In
-              </button>
-            )}
-
             <button onClick={() => setView('landing')} className="text-slate-500 hover:text-white text-sm px-2 py-1.5 rounded-lg hover:bg-white/5 transition">Exit</button>
           </div>
         </nav>
-        {view === 'builder' ? <CVBuilder initialData={editingCV} user={user} onPromptLogin={() => setAuthModalOpen(true)} /> : <Dashboard />}
-        <AuthModal 
-          isOpen={authModalOpen} 
-          onClose={() => setAuthModalOpen(false)} 
-          onAuthSuccess={(userData) => setUser(userData)} 
-        />
+        {view === 'builder' ? <CVBuilder initialData={editingCV} /> : <Dashboard />}
       </div>
     )
   }
@@ -128,7 +80,6 @@ function App() {
         <div className="flex gap-2 sm:gap-4 items-center">
           <a href="#" className="hidden md:block text-slate-400 hover:text-white transition-colors text-sm">How it works</a>
           <a href="#" className="hidden md:block text-slate-400 hover:text-white transition-colors text-sm">Pricing (Free)</a>
-          
           <button
             onClick={() => setView('admin-login')}
             className="flex items-center gap-1.5 text-slate-500 hover:text-indigo-400 transition-colors text-sm px-2 py-1.5 rounded-lg hover:bg-white/5"
@@ -136,36 +87,9 @@ function App() {
             <LucideShield size={15} />
             <span className="hidden sm:inline">Admin</span>
           </button>
-
-          {user ? (
-            <>
-              <button 
-                onClick={() => setView('dashboard')}
-                className="text-slate-300 hover:text-white transition-colors text-sm px-3 py-2 rounded-lg hover:bg-white/5 flex items-center gap-1.5"
-              >
-                <LucideLayoutDashboard size={15} />
-                My CVs
-              </button>
-              <button
-                onClick={handleLogout}
-                className="text-red-400 hover:text-red-300 transition-colors text-sm px-3 py-2 rounded-lg hover:bg-red-500/10 flex items-center gap-1.5"
-              >
-                <LucideLogOut size={15} />
-                Logout
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setAuthModalOpen(true)}
-              className="text-slate-300 hover:text-white transition-colors text-sm px-4 py-2 rounded-lg border border-white/10 hover:bg-white/5"
-            >
-              Login
-            </button>
-          )}
-
           <button
             onClick={() => { setEditingCV(null); setView('builder') }}
-            className="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-5 py-2 rounded-lg font-semibold text-sm transition-all hover:scale-105 active:scale-95 animate-pulse-subtle"
+            className="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-5 py-2 rounded-lg font-semibold text-sm transition-all hover:scale-105 active:scale-95"
           >
             Get Started
           </button>
@@ -256,12 +180,6 @@ function App() {
           </div>
         </div>
       </main>
-      
-      <AuthModal 
-        isOpen={authModalOpen} 
-        onClose={() => setAuthModalOpen(false)} 
-        onAuthSuccess={(userData) => setUser(userData)} 
-      />
     </div>
   )
 }

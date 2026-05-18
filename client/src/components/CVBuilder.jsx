@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { API } from '../config/api';
 
-const CVBuilder = ({ initialData, user, onPromptLogin }) => {
+const CVBuilder = ({ initialData }) => {
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [lastSavedId, setLastSavedId] = useState(initialData?._id || null);
@@ -123,25 +123,14 @@ const CVBuilder = ({ initialData, user, onPromptLogin }) => {
       toast.error('Please enter your full name before saving');
       return;
     }
-
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.error('Please sign in or register to save your CV! 🔐');
-      if (onPromptLogin) {
-        onPromptLogin();
-      }
-      return;
-    }
-
     try {
       setLoading(true);
       const response = await axios.post(`${API.cv}/save`, cvData);
       setLastSavedId(response.data._id);
       setCvData(prev => ({ ...prev, _id: response.data._id }));
       toast.success('CV saved successfully! ✅');
-    } catch (error) {
-      console.error('Save CV error:', error);
-      toast.error(error.response?.data?.error || 'Failed to save CV');
+    } catch {
+      toast.error('Failed to save CV');
     } finally {
       setLoading(false);
     }

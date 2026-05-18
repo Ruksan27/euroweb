@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const CV = require('../models/CV');
 const puppeteer = require('puppeteer');
-const auth = require('../middleware/auth');
 const { generateHTML } = require('../utils/pdfTemplate');
 const { uploadMemory, uploadToCloudinary } = require('../config/cloudinary');
 const HTMLtoDOCX = require('html-to-docx');
@@ -69,7 +68,7 @@ router.post('/upload-document', uploadMemory.single('document'), async (req, res
 });
 
 // ─── Save / Update CV ──────────────────────────────────────────────────────────
-router.post('/save', auth, async (req, res) => {
+router.post('/save', async (req, res) => {
   try {
     const cvData = req.body;
 
@@ -79,18 +78,17 @@ router.post('/save', auth, async (req, res) => {
     }
 
     cvData.folderName = toFolderName(cvData.personalInfo.fullName);
-    cvData.userId = req.user._id; // Bind to current user
 
     // Sanitize: remove __v and internal fields if sent from client
     delete cvData.__v;
 
     if (cvData._id) {
-      const updated = await CV.findOneAndUpdate(
-        { _id: cvData._id, userId: req.user._id },
+      const updated = await CV.findByIdAndUpdate(
+        cvData._id,
         { $set: cvData },
         { new: true, runValidators: true, returnDocument: 'after' }
       );
-      if (!updated) return res.status(404).json({ error: 'CV not found or unauthorized' });
+      if (!updated) return res.status(404).json({ error: 'CV not found' });
       return res.json(updated);
     }
 
@@ -187,10 +185,10 @@ router.get('/generate-docx/:id', async (req, res) => {
   }
 });
 
-// ─── List All CVs (User Specific) ─────────────────────────────────────────────
-router.get('/list', auth, async (req, res) => {
+// ─── List All CVs ──────────────────────────────────────────────────────────────
+router.get('/list', async (req, res) => {
   try {
-    const cvs = await CV.find({ userId: req.user._id }).sort({ createdAt: -1 }).lean();
+    const cvs = await CV.find().sort({ createdAt: -1 }).lean();
     res.json(cvs);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch CVs' });
@@ -198,10 +196,10 @@ router.get('/list', auth, async (req, res) => {
 });
 
 // ─── Delete CV ─────────────────────────────────────────────────────────────────
-router.delete('/delete/:id', auth, async (req, res) => {
+router.delete('/delete/:id', async (req, res) => {
   try {
-    const deleted = await CV.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
-    if (!deleted) return res.status(404).json({ error: 'CV not found or unauthorized' });
+    const deleted = await CV.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'CV not found' });
     res.json({ message: 'CV deleted successfully' });
   } catch (error) {
     console.error('Delete error:', error.message);
