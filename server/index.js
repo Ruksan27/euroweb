@@ -81,6 +81,7 @@ app.get('/health', (req, res) => {
 });
 
 // ─── Routes ─────────────────────────────────────────────────────────────────────
+app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/ai', aiLimiter, require('./routes/aiRoutes'));
 app.use('/api/cv', require('./routes/cvRoutes'));
 app.use('/api/admin', adminLoginLimiter, require('./routes/adminRoutes'));

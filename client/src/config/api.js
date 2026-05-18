@@ -1,3 +1,17 @@
+import axios from 'axios';
+
+// Automatically append authorization token to every axios request
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Central API base URL - change this for production
 const getApiBase = () => {
   if (import.meta.env.VITE_API_URL) {
