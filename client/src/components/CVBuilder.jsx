@@ -135,34 +135,85 @@ const CVBuilder = ({ initialData }) => {
     }
   };
 
-  const downloadFile = (type) => {
+  const downloadFile = async (type) => {
     const id = lastSavedId || cvData._id;
-    if (!id) { toast.error('Save the CV first before downloading'); return; }
-
-    const toastId = toast.loading(`Downloading ${type.toUpperCase()}...`);
-    const fileName = (cvData.personalInfo?.fullName || 'Europass_CV').replace(/\s+/g, '_');
-    
-    // Using the requested fetch -> blob -> createObjectURL structure
-    fetch(`${API.cv}/generate-${type}/${id}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Download failed');
-        return res.blob();
-      })
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${fileName}.${type}`; // clean name as requested
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        toast.success(`${type.toUpperCase()} downloaded successfully!`, { id: toastId });
-      })
-      .catch(err => {
-        console.error(err);
-        toast.error(`Failed to download ${type.toUpperCase()}`, { id: toastId });
+  
+    if (!id) {
+      toast.error('Save the CV first before downloading');
+      return;
+    }
+  
+    try {
+      const toastId = toast.loading(`Preparing ${type.toUpperCase()} download...`);
+  
+      const fileName = (cvData.personalInfo?.fullName || 'Europass_CV')
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '_');
+  
+      // यदि localStorage मा token छ भने include गर्ने
+      const token = localStorage.getItem('token');
+  
+      const response = await fetch(`${API.cv}/generate-${type}/${id}`, {
+        method: 'GET',
+        headers: {
+          ...(token && {
+            Authorization: `Bearer ${token}`
+          })
+        }
       });
+  
+      // HTTP error check
+      if (!response.ok) {
+        let errorMessage = `Server returned ${response.status}`;
+  
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          // ignore if not JSON
+        }
+  
+        throw new Error(errorMessage);
+      }
+  
+      // Blob conversion
+      const blob = await response.blob();
+  
+      // Empty file check
+      if (blob.size === 0) {
+        throw new Error('Generated file is empty');
+      }
+  
+      // Create temporary URL
+      const url = window.URL.createObjectURL(blob);
+  
+      // Create hidden link
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${fileName}.${type}`;
+      link.style.display = 'none';
+  
+      // Append → Click → Remove
+      document.body.appendChild(link);
+      link.click();
+  
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+  
+      toast.success(
+        `${type.toUpperCase()} downloaded successfully!`,
+        { id: toastId }
+      );
+  
+    } catch (error) {
+      console.error('Download Error:', error);
+      toast.error(
+        error.message || `Failed to download ${type.toUpperCase()}`
+      );
+    }
   };
 
   // Helpers
