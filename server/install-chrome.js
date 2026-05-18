@@ -1,13 +1,16 @@
 const { install, resolveBuildId, detectBrowserPlatform } = require('@puppeteer/browsers');
 const path = require('path');
+const { PUPPETEER_REVISIONS } = require('puppeteer-core/internal/revisions.js');
 
 async function run() {
   try {
     const platform = detectBrowserPlatform();
-    const buildId = await resolveBuildId('chrome', platform, '130.0.6723.116');
+    // Resolve version dynamically based on what puppeteer-core expects
+    const expectedVersion = PUPPETEER_REVISIONS.chrome || '148.0.7778.167';
+    const buildId = await resolveBuildId('chrome', platform, expectedVersion);
     const cacheDir = path.join(__dirname, '.cache', 'puppeteer');
     
-    console.log(`Downloading Chrome build ${buildId} for platform ${platform} to ${cacheDir}...`);
+    console.log(`Downloading Chrome build ${buildId} (expected: ${expectedVersion}) for platform ${platform} to ${cacheDir}...`);
     
     await install({
       browser: 'chrome',
