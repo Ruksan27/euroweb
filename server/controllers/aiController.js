@@ -48,7 +48,7 @@ const extractDataFromDocument = async (req, res) => {
     let successModel = null;
 
     // --- TRY GEMINI FIRST (with models fallback) ---
-    const geminiModels = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+    const geminiModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
     const contentParts = [prompt];
     for (const file of req.files) {
       const base64Data = fs.readFileSync(file.path).toString('base64');
@@ -76,8 +76,8 @@ const extractDataFromDocument = async (req, res) => {
 
     // --- FALLBACK TO GROQ IF GEMINI FAILS COMPLETELY ---
     if (!responseText) {
-      console.log("[AI] Gemini failed completely. Falling back to Groq Llama Vision...");
-      const groqModels = ["llama-3.2-90b-vision-preview", "llama-3.2-11b-vision-preview"];
+      console.log("[AI] Gemini failed completely. Falling back to Groq Llama...");
+      const groqModels = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
       
       // Prepare message content for Groq
       const groqContent = [{ type: 'text', text: prompt }];
@@ -95,12 +95,9 @@ const extractDataFromDocument = async (req, res) => {
             console.error(`[AI] Failed to parse PDF text for Groq fallback: ${pdfErr.message}`);
           }
         } else if (file.mimetype.startsWith('image/')) {
-          const base64Data = fs.readFileSync(file.path).toString('base64');
           groqContent.push({
-            type: 'image_url',
-            image_url: {
-              url: `data:${file.mimetype};base64,${base64Data}`
-            }
+            type: 'text',
+            text: `Uploaded file name: ${file.originalname} (Image content is not supported by text-only fallback models)`
           });
         } else {
           // Plain text fallback or placeholder

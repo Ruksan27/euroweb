@@ -5,10 +5,12 @@ import CVBuilder from './components/CVBuilder'
 import Dashboard from './components/Dashboard'
 import AdminDashboard from './components/AdminDashboard'
 import { AdminLogin } from './components/AdminDashboard'
+import Auth from './components/Auth'
 
 function App() {
   const [view, setView] = useState('landing')
   const [adminToken, setAdminToken] = useState(() => localStorage.getItem('admin_token') || null)
+  const [userToken, setUserToken] = useState(() => localStorage.getItem('user_token') || null)
   const [editingCV, setEditingCV] = useState(null)
 
   // Admin route check
@@ -33,8 +35,10 @@ function App() {
   }
 
   if (view === 'builder' || view === 'dashboard') {
+    const showAuth = view === 'dashboard' && !userToken;
+
     return (
-      <div className="min-h-screen w-full text-white">
+      <div className="min-h-screen w-full text-white bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <Toaster position="top-right" toastOptions={{ style: { background: '#1e293b', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' } }} />
         <nav className="w-full max-w-[1600px] mx-auto flex justify-between items-center px-4 sm:px-8 py-4 border-b border-white/5">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('landing')}>
@@ -49,7 +53,7 @@ function App() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${view === 'dashboard' ? 'bg-primary-600/20 text-primary-400' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
             >
               <LucideLayoutDashboard size={16} />
-              <span className="hidden sm:inline">Dashboard</span>
+              <span className="hidden sm:inline">{userToken ? 'Dashboard' : 'Login / Register'}</span>
             </button>
             <button 
               onClick={() => { setEditingCV(null); setView('builder') }} 
@@ -61,7 +65,26 @@ function App() {
             <button onClick={() => setView('landing')} className="text-slate-500 hover:text-white text-sm px-2 py-1.5 rounded-lg hover:bg-white/5 transition">Exit</button>
           </div>
         </nav>
-        {view === 'builder' ? <CVBuilder initialData={editingCV} /> : <Dashboard />}
+        {showAuth ? (
+          <Auth 
+            onAuthSuccess={(token, user) => {
+              setUserToken(token);
+              setView('dashboard');
+            }}
+            onBack={() => setView('landing')}
+          />
+        ) : view === 'builder' ? (
+          <CVBuilder initialData={editingCV} />
+        ) : (
+          <Dashboard 
+            onLogout={() => {
+              localStorage.removeItem('user_token');
+              localStorage.removeItem('user_data');
+              setUserToken(null);
+              setView('landing');
+            }} 
+          />
+        )}
       </div>
     )
   }
@@ -80,6 +103,21 @@ function App() {
         <div className="flex gap-2 sm:gap-4 items-center">
           <a href="#" className="hidden md:block text-slate-400 hover:text-white transition-colors text-sm">How it works</a>
           <a href="#" className="hidden md:block text-slate-400 hover:text-white transition-colors text-sm">Pricing (Free)</a>
+          {userToken ? (
+            <button
+              onClick={() => setView('dashboard')}
+              className="text-slate-300 hover:text-white transition-colors text-sm px-3 py-1.5 rounded-lg hover:bg-white/5 font-medium"
+            >
+              My Dashboard
+            </button>
+          ) : (
+            <button
+              onClick={() => setView('dashboard')}
+              className="text-slate-300 hover:text-white transition-colors text-sm px-3 py-1.5 rounded-lg hover:bg-white/5 font-medium"
+            >
+              Sign In
+            </button>
+          )}
           <button
             onClick={() => setView('admin-login')}
             className="flex items-center gap-1.5 text-slate-500 hover:text-indigo-400 transition-colors text-sm px-2 py-1.5 rounded-lg hover:bg-white/5"

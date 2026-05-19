@@ -5,20 +5,34 @@ import { API } from '../config/api';
 
 import { toast } from 'react-hot-toast';
 
-const Dashboard = () => {
+const Dashboard = ({ onLogout }) => {
   const [cvs, setCvs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('user_data') || '{}');
+    } catch {
+      return {};
+    }
+  });
 
   useEffect(() => {
     fetchCvs();
   }, []);
 
   const fetchCvs = async () => {
+    const token = localStorage.getItem('user_token');
     try {
-      const response = await axios.get(`${API.cv}/list`);
+      const response = await axios.get(`${API.cv}/list`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setCvs(response.data);
     } catch (error) {
       console.error("Failed to fetch CVs", error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        toast.error("Session expired, please login again.");
+        if (onLogout) onLogout();
+      }
     } finally {
       setLoading(false);
     }
@@ -38,8 +52,11 @@ const Dashboard = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this CV?")) return;
+    const token = localStorage.getItem('user_token');
     try {
-      await axios.delete(`${API.cv}/delete/${id}`);
+      await axios.delete(`${API.cv}/delete/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setCvs(p => p.filter(c => c._id !== id));
       toast.success("CV deleted successfully");
     } catch (error) {
@@ -55,8 +72,17 @@ const Dashboard = () => {
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Your Saved CVs</h2>
           <p className="text-slate-400 text-sm mt-1">Manage and download your generated Europass documents</p>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs sm:text-sm text-slate-300">
-          Using Cloudinary (25GB) for your documents
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <span className="block text-sm font-semibold text-white">{user.fullName || 'User'}</span>
+            <span className="block text-xs text-slate-400">{user.email}</span>
+          </div>
+          <button
+            onClick={onLogout}
+            className="text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-2 rounded-xl border border-red-500/20 transition font-medium"
+          >
+            Sign Out
+          </button>
         </div>
       </div>
 

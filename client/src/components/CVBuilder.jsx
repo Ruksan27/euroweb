@@ -128,14 +128,22 @@ const CVBuilder = ({ initialData }) => {
       toast.error('Please enter your full name before saving');
       return;
     }
+    const token = localStorage.getItem('user_token');
+    if (!token) {
+      toast.error('Please log in to save your CV to the database');
+      return;
+    }
     try {
       setLoading(true);
-      const response = await axios.post(`${API.cv}/save`, cvData);
+      const response = await axios.post(`${API.cv}/save`, cvData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setLastSavedId(response.data._id);
       setCvData(prev => ({ ...prev, _id: response.data._id }));
       toast.success('CV saved successfully! ✅');
-    } catch {
-      toast.error('Failed to save CV');
+    } catch (error) {
+      console.error('Save error:', error);
+      toast.error(error.response?.data?.error || 'Failed to save CV');
     } finally {
       setLoading(false);
     }

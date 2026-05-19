@@ -85,6 +85,7 @@ app.get('/health', (req, res) => {
 app.use('/api/ai', aiLimiter, require('./routes/aiRoutes'));
 app.use('/api/cv', require('./routes/cvRoutes'));
 app.use('/api/admin', adminLoginLimiter, require('./routes/adminRoutes'));
+app.use('/api/user', require('./routes/userRoutes'));
 
 // ─── 404 Handler ────────────────────────────────────────────────────────────────
 app.use((req, res) => {

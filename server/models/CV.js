@@ -76,6 +76,7 @@ const CVSchema = new mongoose.Schema({
     uploadedAt: { type: Date, default: Date.now }
   }],
 
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   folderName: String,  // Cloudinary folder: e.g. "john_doe_2024"
   cvFormat: { type: String, default: 'europass' }, // 'europass' | 'modern' | 'minimal'
   themeColor: { type: String, default: '#0e4a8e' },

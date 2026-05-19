@@ -21,6 +21,7 @@ export const API = {
   cv: `${API_BASE}/api/cv`,
   ai: `${API_BASE}/api/ai`,
   admin: `${API_BASE}/api/admin`,
+  user: `${API_BASE}/api/user`,
 };
 
 export default API;
