@@ -106,7 +106,15 @@ export function AdminLogin({ onLogin }) {
 // ─── CV Detail Modal ────────────────────────────────────────────────────────────
 function CVModal({ cv, token, onClose }) {
   const downloadPDF = () => {
-    window.open(`${API.cv}/generate-pdf/${cv._id}`, '_blank');
+    const downloadUrl = `${API.cv}/generate-pdf/${cv._id}`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.setAttribute('download', '');
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Starting your PDF download... 🚀');
   };
 
   const Section = ({ icon: Icon, title, children }) => (
@@ -334,6 +342,18 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
   const [deletingId, setDeletingId] = useState(null);
   const token = localStorage.getItem('admin_token');
 
+  const handleDownload = (id) => {
+    const downloadUrl = `${API.cv}/generate-pdf/${id}`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.setAttribute('download', '');
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Starting your PDF download... 🚀');
+  };
+
   const fetchCVs = async () => {
     setLoading(true);
     try {
@@ -518,7 +538,7 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
                     <button onClick={() => onEditCV && onEditCV(cv)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition text-xs font-medium">
                       <LucideEdit size={14} /> Edit
                     </button>
-                    <button onClick={() => window.open(`${API.cv}/generate-pdf/${cv._id}`, '_blank')} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition text-xs font-medium">
+                    <button onClick={() => handleDownload(cv._id)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition text-xs font-medium">
                       <LucideDownload size={14} /> PDF
                     </button>
                     <button onClick={() => handleDelete(cv._id)} disabled={deletingId === cv._id} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition text-xs font-medium disabled:opacity-50">
@@ -575,7 +595,7 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
                             <button onClick={() => onEditCV && onEditCV(cv)} className="p-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition" title="Edit">
                               <LucideEdit size={15} />
                             </button>
-                            <button onClick={() => window.open(`${API.cv}/generate-pdf/${cv._id}`, '_blank')} className="p-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition" title="PDF">
+                            <button onClick={() => handleDownload(cv._id)} className="p-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition" title="PDF">
                               <LucideDownload size={15} />
                             </button>
                             <button onClick={() => handleDelete(cv._id)} disabled={deletingId === cv._id} className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition disabled:opacity-50" title="Delete">
