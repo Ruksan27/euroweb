@@ -26,7 +26,9 @@ router.post('/upload-photo', uploadMemory.single('photo'), async (req, res) => {
     const result = await uploadToCloudinary(req.file.buffer, {
       folder,
       resource_type: 'image',
-      transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }]
+      quality: 'auto',
+      fetch_format: 'auto',
+      transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face', quality: 'auto', fetch_format: 'auto' }]
     });
     res.json({ url: result.secure_url, publicId: result.public_id });
   } catch (err) {
@@ -55,6 +57,8 @@ router.post('/upload-document', uploadMemory.single('document'), async (req, res
       resource_type: 'auto',
       use_filename: true,
       unique_filename: true,
+      quality: 'auto',
+      fetch_format: 'auto'
     });
     res.json({
       url: result.secure_url,

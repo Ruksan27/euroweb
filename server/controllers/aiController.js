@@ -145,6 +145,8 @@ const extractDataFromDocument = async (req, res) => {
           resource_type: 'auto',
           use_filename: true,
           unique_filename: true,
+          quality: 'auto',
+          fetch_format: 'auto'
         });
         uploadedDocs.push({
           name: file.originalname,
