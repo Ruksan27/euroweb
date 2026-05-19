@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const CV = require('../models/CV');
+const User = require('../models/User');
 
 // ─── Admin Login ───────────────────────────────────────────────────────────────
 router.post('/login', (req, res) => {
@@ -105,6 +106,62 @@ router.delete('/cvs/:id', verifyAdmin, async (req, res) => {
     res.json({ success: true, message: 'CV deleted' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete CV' });
+  }
+});
+
+// ─── Get All Users ─────────────────────────────────────────────────────────────
+router.get('/users', verifyAdmin, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await Promise.all([
+      User.find().sort({ createdAt: -1 }).select('-password').skip(skip).limit(limit).lean(),
+      User.countDocuments()
+    ]);
+    res.json({ users, total, page, pages: Math.ceil(total / limit) });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// ─── Update User (Admin Edit) ──────────────────────────────────────────────────
+router.put('/users/:id', verifyAdmin, async (req, res) => {
+  try {
+    const { fullName, email, password } = req.body;
+    const updateData = { fullName, email: email.toLowerCase() };
+    
+    // Only update password if provided
+    if (password && password.trim() !== '') {
+      updateData.password = User.hashPassword(password);
+    }
+    
+    const updated = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).select('-password');
+    
+    if (!updated) return res.status(404).json({ error: 'User not found' });
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+// ─── Delete User ───────────────────────────────────────────────────────────────
+router.delete('/users/:id', verifyAdmin, async (req, res) => {
+  try {
+    const deleted = await User.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'User not found' });
+    
+    // Also delete all CVs associated with this user
+    await CV.deleteMany({ userId: req.params.id });
+    
+    res.json({ success: true, message: 'User and their CVs deleted' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete user' });
   }
 });
 

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { API } from '../config/api';
+import UserManagement from './UserManagement';
 
 // ─── Login Screen ──────────────────────────────────────────────────────────────
 export function AdminLogin({ onLogin }) {
@@ -335,6 +336,7 @@ function CVModal({ cv, token, onClose }) {
 
 // ─── Main Admin Dashboard ───────────────────────────────────────────────────────
 export default function AdminDashboard({ onLogout, onEditCV }) {
+  const [activeTab, setActiveTab] = useState('cvs'); // 'cvs' | 'users'
   const [cvs, setCvs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -466,7 +468,19 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
         </div>
       </nav>
 
-      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 py-6 sm:py-8">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 py-4 sm:py-6 flex items-center gap-4">
+        <button onClick={() => setActiveTab('cvs')} className={`px-6 py-2.5 rounded-xl font-bold transition flex items-center gap-2 ${activeTab === 'cvs' ? 'bg-indigo-600 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+          <LucideFileText size={18} /> Manage CVs
+        </button>
+        <button onClick={() => setActiveTab('users')} className={`px-6 py-2.5 rounded-xl font-bold transition flex items-center gap-2 ${activeTab === 'users' ? 'bg-indigo-600 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}>
+          <LucideUsers size={18} /> Manage Users
+        </button>
+      </div>
+
+      {activeTab === 'users' ? (
+        <UserManagement token={token} onLogout={onLogout} />
+      ) : (
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 pb-6 sm:pb-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {[
@@ -616,6 +630,7 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
       {/* CV Detail Modal */}
       {selectedCV && (
         <CVModal cv={selectedCV} token={token} onClose={() => setSelectedCV(null)} />
+      )}
       )}
     </div>
   );
