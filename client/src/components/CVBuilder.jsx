@@ -90,6 +90,11 @@ const CVBuilder = ({ initialData }) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    if (files.length > 5) {
+      toast.error('You can upload a maximum of 5 documents at a time.');
+      return;
+    }
+
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append('documents', files[i]);
@@ -210,7 +215,7 @@ const CVBuilder = ({ initialData }) => {
               <input type="file" multiple className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" onChange={handleAIExtract} disabled={loading} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
               <LucideUpload className="mx-auto mb-2 text-indigo-400" size={28} />
               <p className="text-slate-300 font-semibold text-sm sm:text-base">Upload Multiple Documents</p>
-              <p className="text-xs text-slate-500 mt-1">CV, ID, Certificates — AI merges everything!</p>
+              <p className="text-xs text-slate-500 mt-1">CV, ID, Certificates — AI merges everything! (Max 5 files)</p>
               {loading && <div className="mt-2 text-xs text-indigo-400 animate-pulse">Extracting data...</div>}
             </div>
           </section>
