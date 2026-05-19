@@ -5,6 +5,22 @@ const puppeteer = require('puppeteer');
 const { generateHTML } = require('../utils/pdfTemplate');
 const { uploadMemory, uploadToCloudinary } = require('../config/cloudinary');
 const HTMLtoDOCX = require('html-to-docx');
+const fs = require('fs');
+
+// Helper to resolve local Google Chrome or Edge path on Windows to avoid Puppeteer launch timeouts
+const getExecutablePath = () => {
+  if (process.platform === 'win32') {
+    const paths = [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'
+    ];
+    for (const p of paths) {
+      if (fs.existsSync(p)) return p;
+    }
+  }
+  return undefined; // Fallback to Puppeteer's cached browser on other platforms (Linux/Docker)
+};
 
 // Helper: sanitize name for Cloudinary folder
 const toFolderName = (name) =>
@@ -112,8 +128,18 @@ router.get('/generate-pdf/:id', async (req, res) => {
     if (!cv) return res.status(404).json({ error: 'CV not found' });
 
     const browser = await puppeteer.launch({
+      executablePath: getExecutablePath(),
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process'
+      ],
+      dumpio: true
     });
     const page = await browser.newPage();
     await page.setContent(generateHTML(cv), { waitUntil: 'networkidle2', timeout: 60000 });
@@ -143,8 +169,18 @@ router.get('/generate-jpg/:id', async (req, res) => {
     if (!cv) return res.status(404).json({ error: 'CV not found' });
 
     const browser = await puppeteer.launch({
+      executablePath: getExecutablePath(),
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process'
+      ],
+      dumpio: true
     });
     const page = await browser.newPage();
     // Use networkidle2 and increase timeout to prevent hanging on external images
