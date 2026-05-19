@@ -1,17 +1,18 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require('fs');
 const { uploadToCloudinary } = require('../config/cloudinary');
+const Groq = require('groq-sdk');
+const pdfParse = require('pdf-parse');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const extractDataFromDocument = async (req, res) => {
-  console.log("--- New Multi-File Extraction Request Received (GEMINI) ---");
+  console.log("--- New Multi-File Extraction Request Received ---");
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
     }
-
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
       You are an expert HR data extractor. I have provided one or more files (these could be CVs, ID cards, education certificates, etc.).
@@ -39,7 +40,11 @@ const extractDataFromDocument = async (req, res) => {
       }
     `;
 
-    // Process all files to pass into Gemini
+    let responseText = null;
+    let successModel = null;
+
+    // --- TRY GEMINI FIRST (with models fallback) ---
+    const geminiModels = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
     const contentParts = [prompt];
     for (const file of req.files) {
       const base64Data = fs.readFileSync(file.path).toString('base64');
@@ -49,11 +54,80 @@ const extractDataFromDocument = async (req, res) => {
           mimeType: file.mimetype
         }
       });
-      // Do NOT delete yet, we need it for Cloudinary upload
     }
 
-    const chatCompletion = await model.generateContent(contentParts);
-    let responseText = chatCompletion.response.text();
+    for (const modelName of geminiModels) {
+      try {
+        console.log(`[AI] Attempting extraction using Gemini model: ${modelName}`);
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const chatCompletion = await model.generateContent(contentParts);
+        responseText = chatCompletion.response.text();
+        successModel = `Gemini (${modelName})`;
+        console.log(`[AI] Successfully extracted data using Gemini model: ${modelName}`);
+        break; // Exit loop if successful
+      } catch (err) {
+        console.error(`[AI] Gemini model ${modelName} failed:`, err.message);
+      }
+    }
+
+    // --- FALLBACK TO GROQ IF GEMINI FAILS COMPLETELY ---
+    if (!responseText) {
+      console.log("[AI] Gemini failed completely. Falling back to Groq Llama Vision...");
+      const groqModels = ["llama-3.2-90b-vision-preview", "llama-3.2-11b-vision-preview"];
+      
+      // Prepare message content for Groq
+      const groqContent = [{ type: 'text', text: prompt }];
+      for (const file of req.files) {
+        if (file.mimetype === 'application/pdf') {
+          try {
+            console.log(`[AI] Parsing PDF text using pdf-parse for: ${file.originalname}`);
+            const dataBuffer = fs.readFileSync(file.path);
+            const pdfData = await pdfParse(dataBuffer);
+            groqContent.push({
+              type: 'text',
+              text: `--- Start of PDF Content (${file.originalname}) ---\n${pdfData.text}\n--- End of PDF Content ---`
+            });
+          } catch (pdfErr) {
+            console.error(`[AI] Failed to parse PDF text for Groq fallback: ${pdfErr.message}`);
+          }
+        } else if (file.mimetype.startsWith('image/')) {
+          const base64Data = fs.readFileSync(file.path).toString('base64');
+          groqContent.push({
+            type: 'image_url',
+            image_url: {
+              url: `data:${file.mimetype};base64,${base64Data}`
+            }
+          });
+        } else {
+          // Plain text fallback or placeholder
+          groqContent.push({
+            type: 'text',
+            text: `Uploaded file name: ${file.originalname} (Non-image/Non-PDF content)`
+          });
+        }
+      }
+
+      for (const modelName of groqModels) {
+        try {
+          console.log(`[AI] Attempting extraction using Groq model: ${modelName}`);
+          const completion = await groq.chat.completions.create({
+            messages: [{ role: 'user', content: groqContent }],
+            model: modelName,
+            response_format: { type: 'json_object' }
+          });
+          responseText = completion.choices[0].message.content;
+          successModel = `Groq (${modelName})`;
+          console.log(`[AI] Successfully extracted data using Groq model: ${modelName}`);
+          break; // Exit loop if successful
+        } catch (err) {
+          console.error(`[AI] Groq model ${modelName} failed:`, err.message);
+        }
+      }
+    }
+
+    if (!responseText) {
+      throw new Error("All Gemini and Groq models failed to process the request.");
+    }
     
     // Clean JSON response
     responseText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
@@ -85,17 +159,18 @@ const extractDataFromDocument = async (req, res) => {
     }
     
     result.documents = uploadedDocs;
+    result.extractedBy = successModel; // Add source info to result
     return res.json(result);
 
   } catch (error) {
-    console.error("GEMINI ERROR:", error.message);
+    console.error("AI EXTRACTION ERROR:", error.message);
     // Cleanup files if error occurred
     if (req.files) {
       req.files.forEach(f => {
         if (fs.existsSync(f.path)) fs.unlinkSync(f.path);
       });
     }
-    res.status(500).json({ error: "Gemini AI failed", details: error.message });
+    res.status(500).json({ error: "AI extraction failed", details: error.message });
   }
 };
 
