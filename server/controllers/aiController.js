@@ -19,6 +19,10 @@ const extractDataFromDocument = async (req, res) => {
       Extract and combine ALL relevant details across ALL the provided documents into a SINGLE comprehensive JSON object.
       ONLY return valid JSON. Do not return markdown blocks like \`\`\`json.
       
+      CRITICAL TRANSLATION INSTRUCTION:
+      - If any uploaded document is in Nepali, Arabic (Gulf), Hindi, or any other non-English language, you MUST translate all extracted values (such as names, addresses, about me, occupations, responsibilities, certificates, field of study, etc.) into professional English.
+      - Never return non-English scripts (like Devnagari, Arabic script, etc.) in the final JSON values.
+      
       CRITICAL INSTRUCTIONS FOR ENUM VALUES:
       - Inside "languages", the skills ("listening", "reading", "spokenInteraction", "spokenProduction", "writing") MUST strictly map to one of these CEFR levels: "A1", "A2", "B1", "B2", "C1", "C2". If not specified, map to a reasonable fit (e.g., intermediate is B2, advanced is C1).
       - Inside "education", "eqfLevel" MUST strictly map to one of these: "EQF level 1", "EQF level 2", "EQF level 3", "EQF level 4", "EQF level 5", "EQF level 6", "EQF level 7", "EQF level 8" (typically: Bachelor's/B.Sc/B.E is "EQF level 6", Master's/M.Sc is "EQF level 7", Ph.D. is "EQF level 8", Secondary is "EQF level 4").
