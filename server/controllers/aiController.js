@@ -19,6 +19,10 @@ const extractDataFromDocument = async (req, res) => {
       Extract and combine ALL relevant details across ALL the provided documents into a SINGLE comprehensive JSON object.
       ONLY return valid JSON. Do not return markdown blocks like \`\`\`json.
       
+      CRITICAL EXTRACTION INSTRUCTIONS:
+      - EXTRA CERTIFICATES: You MUST carefully extract ALL extra certificates, courses, workshops, and trainings mentioned in the document and put them into the "certificates" array. Do not miss a single certificate!
+      - EDUCATION: You MUST extract ALL education degrees, diplomas, schools, colleges, and academic qualifications into the "education" array. Include organization names, dates, and qualifications accurately.
+      
       CRITICAL TRANSLATION INSTRUCTION:
       - If any uploaded document is in Nepali, Arabic (Gulf), Hindi, or any other non-English language, you MUST translate all extracted values (such as names, addresses, about me, occupations, responsibilities, certificates, field of study, etc.) into professional English.
       - Never return non-English scripts (like Devnagari, Arabic script, etc.) in the final JSON values.
@@ -47,87 +51,88 @@ const extractDataFromDocument = async (req, res) => {
     let responseText = null;
     let successModel = null;
 
-    // --- TRY GEMINI FIRST (with models fallback) ---
-    const geminiModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
-    const contentParts = [prompt];
+    // --- TRY GROQ FIRST (User specifically requested Groq) ---
+    console.log("[AI] Attempting extraction using Groq...");
+    const groqModels = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
+    
+    // Prepare message content for Groq
+    const groqContent = [{ type: 'text', text: prompt }];
     for (const file of req.files) {
-      const base64Data = fs.readFileSync(file.path).toString('base64');
-      contentParts.push({
-        inlineData: {
-          data: base64Data,
-          mimeType: file.mimetype
+      if (file.mimetype === 'application/pdf') {
+        try {
+          console.log(`[AI] Parsing PDF text using pdf-parse for: ${file.originalname}`);
+          const dataBuffer = fs.readFileSync(file.path);
+          const pdfData = await pdfParse(dataBuffer);
+          groqContent.push({
+            type: 'text',
+            text: `--- Start of PDF Content (${file.originalname}) ---\n${pdfData.text}\n--- End of PDF Content ---`
+          });
+        } catch (pdfErr) {
+          console.error(`[AI] Failed to parse PDF text for Groq fallback: ${pdfErr.message}`);
         }
-      });
+      } else if (file.mimetype.startsWith('image/')) {
+        groqContent.push({
+          type: 'text',
+          text: `Uploaded file name: ${file.originalname} (Image content is not supported by text-only Groq models)`
+        });
+      } else {
+        // Plain text fallback or placeholder
+        groqContent.push({
+          type: 'text',
+          text: `Uploaded file name: ${file.originalname} (Non-image/Non-PDF content)`
+        });
+      }
     }
 
-    for (const modelName of geminiModels) {
+    for (const modelName of groqModels) {
       try {
-        console.log(`[AI] Attempting extraction using Gemini model: ${modelName}`);
-        const model = genAI.getGenerativeModel({ model: modelName });
-        const chatCompletion = await model.generateContent(contentParts);
-        responseText = chatCompletion.response.text();
-        successModel = `Gemini (${modelName})`;
-        console.log(`[AI] Successfully extracted data using Gemini model: ${modelName}`);
+        console.log(`[AI] Attempting extraction using Groq model: ${modelName}`);
+        const completion = await groq.chat.completions.create({
+          messages: [{ role: 'user', content: groqContent }],
+          model: modelName,
+          response_format: { type: 'json_object' }
+        });
+        responseText = completion.choices[0].message.content;
+        successModel = `Groq (${modelName})`;
+        console.log(`[AI] Successfully extracted data using Groq model: ${modelName}`);
         break; // Exit loop if successful
       } catch (err) {
-        console.error(`[AI] Gemini model ${modelName} failed:`, err.message);
+        console.error(`[AI] Groq model ${modelName} failed:`, err.message);
       }
     }
 
-    // --- FALLBACK TO GROQ IF GEMINI FAILS COMPLETELY ---
+    // --- FALLBACK TO GEMINI IF GROQ FAILS (e.g. for image inputs) ---
     if (!responseText) {
-      console.log("[AI] Gemini failed completely. Falling back to Groq Llama...");
-      const groqModels = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
-      
-      // Prepare message content for Groq
-      const groqContent = [{ type: 'text', text: prompt }];
+      console.log("[AI] Groq failed completely or could not process images. Falling back to Gemini...");
+      const geminiModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
+      const contentParts = [prompt];
       for (const file of req.files) {
-        if (file.mimetype === 'application/pdf') {
-          try {
-            console.log(`[AI] Parsing PDF text using pdf-parse for: ${file.originalname}`);
-            const dataBuffer = fs.readFileSync(file.path);
-            const pdfData = await pdfParse(dataBuffer);
-            groqContent.push({
-              type: 'text',
-              text: `--- Start of PDF Content (${file.originalname}) ---\n${pdfData.text}\n--- End of PDF Content ---`
-            });
-          } catch (pdfErr) {
-            console.error(`[AI] Failed to parse PDF text for Groq fallback: ${pdfErr.message}`);
+        const base64Data = fs.readFileSync(file.path).toString('base64');
+        contentParts.push({
+          inlineData: {
+            data: base64Data,
+            mimeType: file.mimetype
           }
-        } else if (file.mimetype.startsWith('image/')) {
-          groqContent.push({
-            type: 'text',
-            text: `Uploaded file name: ${file.originalname} (Image content is not supported by text-only fallback models)`
-          });
-        } else {
-          // Plain text fallback or placeholder
-          groqContent.push({
-            type: 'text',
-            text: `Uploaded file name: ${file.originalname} (Non-image/Non-PDF content)`
-          });
-        }
+        });
       }
 
-      for (const modelName of groqModels) {
+      for (const modelName of geminiModels) {
         try {
-          console.log(`[AI] Attempting extraction using Groq model: ${modelName}`);
-          const completion = await groq.chat.completions.create({
-            messages: [{ role: 'user', content: groqContent }],
-            model: modelName,
-            response_format: { type: 'json_object' }
-          });
-          responseText = completion.choices[0].message.content;
-          successModel = `Groq (${modelName})`;
-          console.log(`[AI] Successfully extracted data using Groq model: ${modelName}`);
+          console.log(`[AI] Attempting extraction using Gemini model: ${modelName}`);
+          const model = genAI.getGenerativeModel({ model: modelName });
+          const chatCompletion = await model.generateContent(contentParts);
+          responseText = chatCompletion.response.text();
+          successModel = `Gemini (${modelName})`;
+          console.log(`[AI] Successfully extracted data using Gemini model: ${modelName}`);
           break; // Exit loop if successful
         } catch (err) {
-          console.error(`[AI] Groq model ${modelName} failed:`, err.message);
+          console.error(`[AI] Gemini model ${modelName} failed:`, err.message);
         }
       }
     }
 
     if (!responseText) {
-      throw new Error("All Gemini and Groq models failed to process the request.");
+      throw new Error("All Groq and Gemini models failed to process the request.");
     }
     
     // Clean JSON response

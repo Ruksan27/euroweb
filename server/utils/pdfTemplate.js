@@ -177,8 +177,7 @@ const generateHTML = (data) => {
           </div>
         </div>` : ''}
       </div>
-      <div style="padding: 15px 40px; border-top: 1px solid #eee; text-align: center; font-size: 9px; color: #999; margin-top: 30px;">
-        Generated with EuroBuilder AI • Europass Official Style
+      <div style="padding: 15px 40px; border-top: 1px solid #eee; margin-top: 30px;">
       </div>
     `;
   } 
@@ -357,6 +356,97 @@ const generateHTML = (data) => {
         <div class="title-min">Skills</div>
         <div class="skills-min">
           ${data.digitalSkills.join(' · ')}
+        </div>
+      </div>` : ''}
+    `;
+  }
+
+  else if (format === 'general') {
+    // -------------------------------------------------------------------------
+    // GENERAL TEMPLATE (Standard, clean corporate resume format)
+    // -------------------------------------------------------------------------
+    css = `
+      .page { padding: 40px 50px; color: #333; }
+      .header-general { border-bottom: 2px solid ${themeColor}; padding-bottom: 15px; margin-bottom: 25px; display: flex; align-items: center; gap: 20px; }
+      .photo-general img, .photo-general .no-photo { width: 90px; height: 90px; object-fit: cover; }
+      .photo-general .no-photo { background: #eee; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #999; }
+      .header-general-info h1 { font-size: 28px; color: ${themeColor}; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+      .contact-general { font-size: 11px; color: #555; }
+      
+      .section-gen { margin-bottom: 20px; }
+      .title-gen { font-size: 14px; font-weight: 700; color: ${themeColor}; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 12px; text-transform: uppercase; }
+      
+      .item-gen { margin-bottom: 15px; }
+      .item-gen-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 700; color: #222; }
+      .item-gen-sub { font-size: 12px; font-style: italic; color: #666; margin-bottom: 6px; }
+      .item-gen ul { padding-left: 18px; font-size: 11px; line-height: 1.5; color: #444; }
+      
+      .text-gen { font-size: 11px; line-height: 1.6; color: #444; }
+    `;
+
+    bodyContent = `
+      <div class="header-general">
+        ${data.photoUrl ? renderPhoto('photo-general') : ''}
+        <div class="header-general-info">
+          <h1>${p.fullName || 'YOUR NAME'}</h1>
+          <div class="contact-general">
+            ${[p.email, p.phone, p.address ? p.address + (p.city ? ', ' + p.city : '') : '', p.linkedIn].filter(Boolean).join(' &bull; ')}
+          </div>
+        </div>
+      </div>
+
+      ${p.aboutMe ? `
+      <div class="section-gen">
+        <div class="title-gen">Professional Summary</div>
+        <div class="text-gen">${p.aboutMe}</div>
+      </div>` : ''}
+
+      ${(data.workExperience?.length) ? `
+      <div class="section-gen">
+        <div class="title-gen">Work Experience</div>
+        ${data.workExperience.map(exp => `
+          <div class="item-gen">
+            <div class="item-gen-head">
+              <span>${exp.occupation}</span>
+              <span style="font-size: 11px; font-weight: 600; color: #666;">${exp.from} - ${exp.to}</span>
+            </div>
+            <div class="item-gen-sub">${exp.employer} ${exp.city ? '| ' + exp.city : ''}</div>
+            ${exp.responsibilities?.length ? `<ul>${exp.responsibilities.filter(Boolean).map(r => `<li>${r}</li>`).join('')}</ul>` : ''}
+          </div>
+        `).join('')}
+      </div>` : ''}
+
+      ${(data.education?.length) ? `
+      <div class="section-gen">
+        <div class="title-gen">Education</div>
+        ${data.education.map(edu => `
+          <div class="item-gen">
+            <div class="item-gen-head">
+              <span>${edu.qualification}</span>
+              <span style="font-size: 11px; font-weight: 600; color: #666;">${edu.from} - ${edu.to}</span>
+            </div>
+            <div class="item-gen-sub">${edu.organization} ${edu.city ? '| ' + edu.city : ''}</div>
+          </div>
+        `).join('')}
+      </div>` : ''}
+
+      ${(data.certificates?.length) ? `
+      <div class="section-gen">
+        <div class="title-gen">Certifications</div>
+        ${data.certificates.map(cert => `
+          <div class="item-gen" style="margin-bottom: 8px;">
+            <div style="font-size: 12px; font-weight: 700; color: #222;">${cert.title}</div>
+            <div style="font-size: 11px; color: #666;">${cert.issuer} ${cert.date ? '(' + cert.date + ')' : ''}</div>
+          </div>
+        `).join('')}
+      </div>` : ''}
+
+      ${(data.digitalSkills?.length || data.otherSkills?.length) ? `
+      <div class="section-gen">
+        <div class="title-gen">Skills</div>
+        <div class="text-gen">
+          <strong>Technical/Digital:</strong> ${(data.digitalSkills || []).join(', ')}<br/>
+          <strong>Other:</strong> ${(data.otherSkills || []).join(', ')}
         </div>
       </div>` : ''}
     `;

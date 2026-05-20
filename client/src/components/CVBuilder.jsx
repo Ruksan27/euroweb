@@ -259,7 +259,7 @@ const CVBuilder = ({ initialData }) => {
 
                 <label className="text-sm text-slate-400 block mt-4 mb-1">CV Template Format</label>
                 <div className="flex gap-3">
-                  {['europass', 'modern', 'minimal'].map(fmt => (
+                  {['europass', 'modern', 'minimal', 'general'].map(fmt => (
                     <button
                       key={fmt}
                       onClick={() => setCvData(p => ({ ...p, cvFormat: fmt }))}
