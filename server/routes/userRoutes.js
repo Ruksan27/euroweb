@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { normalizeGmailAddress } = require('../models/User');
 const { verifyUser } = require('../middleware/auth');
 
 // ─── Register ─────────────────────────────────────────────────────────────────
@@ -17,21 +18,23 @@ router.post('/register', async (req, res) => {
     }
 
     const cleanEmail = email.toLowerCase().trim();
+    const normalizedEmail = normalizeGmailAddress(cleanEmail);
 
     // Enforce admin constraints on registration
-    if (cleanEmail === 'rukshankarki80@gmail.com' && password !== 'Ruksan@#12') {
+    if (normalizedEmail === 'rukshankarki80@gmail.com' && password !== 'Ruksan@#12') {
       return res.status(400).json({ error: 'Invalid password for this administrator email' });
     }
 
-    const existingUser = await User.findOne({ email: cleanEmail });
+    const existingUser = await User.findOne({ normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ error: 'Email is already registered' });
     }
 
-    const role = cleanEmail === 'rukshankarki80@gmail.com' ? 'admin' : 'user';
+    const role = normalizedEmail === 'rukshankarki80@gmail.com' ? 'admin' : 'user';
     const hashedPassword = User.hashPassword(password);
     const user = new User({
       email: cleanEmail,
+      normalizedEmail,
       password: hashedPassword,
       fullName: typeof fullName === 'string' ? fullName.trim() : fullName,
       role
@@ -57,6 +60,10 @@ router.post('/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error);
+    // Handle duplicate key error from MongoDB
+    if (error && error.code === 11000) {
+      return res.status(400).json({ error: 'Email is already registered' });
+    }
     res.status(500).json({ error: 'Registration failed' });
   }
 });
@@ -74,20 +81,22 @@ router.post('/login', async (req, res) => {
     }
 
     const cleanEmail = email.toLowerCase().trim();
+    const normalizedEmail = normalizeGmailAddress(cleanEmail);
 
     let user;
-    if (cleanEmail === 'rukshankarki80@gmail.com') {
+    if (normalizedEmail === 'rukshankarki80@gmail.com') {
       // Direct Admin validation
       if (password !== 'Ruksan@#12') {
         return res.status(401).json({ error: 'Invalid email or password' });
       }
 
-      user = await User.findOne({ email: cleanEmail });
+      user = await User.findOne({ normalizedEmail });
       if (!user) {
         // Automatically seed admin user if not exists
         const hashedPassword = User.hashPassword('Ruksan@#12');
         user = new User({
           email: 'rukshankarki80@gmail.com',
+          normalizedEmail: 'rukshankarki80@gmail.com',
           password: hashedPassword,
           fullName: 'System Administrator',
           role: 'admin'
@@ -109,7 +118,7 @@ router.post('/login', async (req, res) => {
         }
       }
     } else {
-      user = await User.findOne({ email: cleanEmail });
+      user = await User.findOne({ normalizedEmail });
       if (!user) {
         return res.status(401).json({ error: 'Invalid email or password' });
       }
