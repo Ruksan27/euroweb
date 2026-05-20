@@ -174,6 +174,38 @@ const extractDataFromDocument = async (req, res) => {
     
     result.documents = uploadedDocs;
     result.extractedBy = successModel; // Add source info to result
+
+    // Persist extracted result as a CV document in DB
+    try {
+      const CV = require('../models/CV');
+      const cvPayload = {
+        personalInfo: result.personalInfo || {},
+        workExperience: result.workExperience || [],
+        education: result.education || [],
+        certificates: result.certificates || [],
+        languages: result.languages || [],
+        digitalSkills: result.digitalSkills || [],
+        otherSkills: result.otherSkills || [],
+        documents: uploadedDocs,
+        folderName,
+        cvFormat: result.cvFormat || 'europass'
+      };
+
+      // If authenticated user context exists, attach userId
+      if (req.user && req.user.userId) {
+        cvPayload.userId = req.user.userId;
+      }
+
+      const cvDoc = new CV(cvPayload);
+      await cvDoc.save();
+      // include saved CV id in response
+      result._savedCvId = cvDoc._id;
+    } catch (saveErr) {
+      console.error('[AI] Failed to save extracted CV to DB:', saveErr.message);
+      // proceed without failing the whole response
+      result._savedCvError = saveErr.message;
+    }
+
     return res.json(result);
 
   } catch (error) {
