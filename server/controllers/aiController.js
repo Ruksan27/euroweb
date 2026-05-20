@@ -137,12 +137,15 @@ const extractDataFromDocument = async (req, res) => {
     
     // Clean JSON response
     responseText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+    console.log('[AI] Raw responseText length:', responseText.length ? responseText.length : 0);
     const result = JSON.parse(responseText);
+    console.log('[AI] Parsed result:', !!result && !!result.personalInfo ? (result.personalInfo.fullName || '(no name)') : 'no personalInfo');
 
     // Upload to Cloudinary
     const folderName = (result.personalInfo?.fullName || 'unknown_ai').toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').trim('_');
     const uploadedDocs = [];
 
+    console.log('[AI] Uploading', req.files.length, 'files to Cloudinary');
     for (const file of req.files) {
       const base64Data = fs.readFileSync(file.path);
       try {
@@ -196,16 +199,19 @@ const extractDataFromDocument = async (req, res) => {
         cvPayload.userId = req.user.userId;
       }
 
+      console.log('[AI] Saving CV to DB for', cvPayload.personalInfo?.fullName || '(no name)');
       const cvDoc = new CV(cvPayload);
       await cvDoc.save();
+      console.log('[AI] CV saved to DB with id', cvDoc._id.toString());
       // include saved CV id in response
       result._savedCvId = cvDoc._id;
     } catch (saveErr) {
-      console.error('[AI] Failed to save extracted CV to DB:', saveErr.message);
+      console.error('[AI] Failed to save extracted CV to DB:', saveErr);
       // proceed without failing the whole response
       result._savedCvError = saveErr.message;
     }
 
+    console.log('[AI] Returning response, savedId=', result._savedCvId, ' savedError=', result._savedCvError);
     return res.json(result);
 
   } catch (error) {
