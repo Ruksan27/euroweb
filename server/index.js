@@ -8,6 +8,25 @@ const path = require('path');
 // Load env first
 require('dotenv').config();
 
+// Validate required environment variables in production and development
+const requiredEnv = [
+  'MONGODB_URI',
+  'JWT_SECRET',
+  'ADMIN_USERNAME',
+  'ADMIN_PASSWORD',
+  'CLOUDINARY_CLOUD_NAME',
+  'CLOUDINARY_API_KEY',
+  'CLOUDINARY_API_SECRET'
+];
+
+const missingEnv = requiredEnv.filter(envName => !process.env[envName] || process.env[envName].trim() === '');
+if (missingEnv.length > 0) {
+  console.error('\n❌ CRITICAL SECURITY ERROR: Missing required environment variables:');
+  missingEnv.forEach(envName => console.error(`   - ${envName}`));
+  console.error('\nThe server will not start in an unconfigured or insecure state. Please check your .env file or hosting provider configurations.\n');
+  process.exit(1);
+}
+
 const app = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5005;

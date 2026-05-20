@@ -12,23 +12,29 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Invalid input format' });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+
+    const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return res.status(400).json({ error: 'Email is already registered' });
     }
 
     const hashedPassword = User.hashPassword(password);
     const user = new User({
-      email: email.toLowerCase(),
+      email: cleanEmail,
       password: hashedPassword,
-      fullName
+      fullName: typeof fullName === 'string' ? fullName.trim() : fullName
     });
 
     await user.save();
 
     const token = jwt.sign(
       { userId: user._id, email: user.email },
-      process.env.JWT_SECRET || 'supersecretkey',
+      process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
 
@@ -55,7 +61,13 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Invalid input format' });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
@@ -67,7 +79,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign(
       { userId: user._id, email: user.email },
-      process.env.JWT_SECRET || 'supersecretkey',
+      process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
 

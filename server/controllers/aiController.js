@@ -162,8 +162,14 @@ const extractDataFromDocument = async (req, res) => {
       } catch(e) {
         console.error("Cloudinary upload failed for", file.originalname, e);
       }
-      // Delete after processing
-      fs.unlinkSync(file.path);
+      // Delete after processing safely
+      if (fs.existsSync(file.path)) {
+        try {
+          fs.unlinkSync(file.path);
+        } catch (err) {
+          console.error(`[AI] Failed to delete temp file ${file.path}:`, err.message);
+        }
+      }
     }
     
     result.documents = uploadedDocs;
@@ -175,7 +181,13 @@ const extractDataFromDocument = async (req, res) => {
     // Cleanup files if error occurred
     if (req.files) {
       req.files.forEach(f => {
-        if (fs.existsSync(f.path)) fs.unlinkSync(f.path);
+        if (fs.existsSync(f.path)) {
+          try {
+            fs.unlinkSync(f.path);
+          } catch (err) {
+            console.error(`[AI] Failed to cleanup temp file ${f.path}:`, err.message);
+          }
+        }
       });
     }
     res.status(500).json({ error: "AI extraction failed", details: error.message });
