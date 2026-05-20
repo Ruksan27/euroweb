@@ -144,7 +144,8 @@ router.get('/generate-pdf/:id', async (req, res) => {
       dumpio: true
     });
     const page = await browser.newPage();
-    await page.setContent(generateHTML(cv), { waitUntil: 'networkidle2', timeout: 60000 });
+    await page.setContent(generateHTML(cv), { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForNetworkIdle({ idleTime: 500, timeout: 15000 }).catch(() => {});
     const pdfBuffer = await page.pdf({
       format: 'A4', printBackground: true,
       margin: { top: '0', right: '0', bottom: '0', left: '0' },
@@ -186,7 +187,8 @@ router.get('/generate-jpg/:id', async (req, res) => {
     });
     const page = await browser.newPage();
     // Use networkidle2 and increase timeout to prevent hanging on external images
-    await page.setContent(generateHTML(cv), { waitUntil: 'networkidle2', timeout: 60000 });
+    await page.setContent(generateHTML(cv), { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForNetworkIdle({ idleTime: 500, timeout: 15000 }).catch(() => {});
     const imgBuffer = await page.screenshot({ type: 'jpeg', quality: 95, fullPage: true });
     await browser.close();
 
