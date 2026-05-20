@@ -134,7 +134,8 @@ const extractDataFromDocument = async (req, res) => {
     // --- FALLBACK TO GEMINI IF GROQ FAILS (e.g. for image inputs) ---
     if (!responseText) {
       console.log("[AI] Groq failed completely or could not process images. Falling back to Gemini...");
-      const geminiModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
+      // Expanded Gemini model list to prevent rate limiting
+      const geminiModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
       const contentParts = [prompt];
       for (const file of req.files) {
         const base64Data = fs.readFileSync(file.path).toString('base64');
@@ -161,73 +162,8 @@ const extractDataFromDocument = async (req, res) => {
       }
     }
 
-    // --- FALLBACK TO GROQ VISION IF GEMINI FAILS ---
     if (!responseText) {
-      console.log("[AI] Gemini failed or not available. Falling back to Groq Vision models...");
-      const groqVisionModels = ["llama-3.2-90b-vision-preview", "llama-3.2-11b-vision-preview"];
-      const groqVisionContent = [{ type: 'text', text: prompt }];
-      let canUseVision = false;
-
-      for (const file of req.files) {
-        if (file.mimetype.startsWith('image/')) {
-          const base64Data = fs.readFileSync(file.path).toString('base64');
-          groqVisionContent.push({
-            type: 'image_url',
-            image_url: {
-              url: `data:${file.mimetype};base64,${base64Data}`
-            }
-          });
-          canUseVision = true;
-        } else if (file.mimetype === 'application/pdf') {
-           try {
-             const dataBuffer = fs.readFileSync(file.path);
-             const pdfData = await pdfParse(dataBuffer);
-             groqVisionContent.push({
-                type: 'text',
-                text: `--- Start of PDF Content (${file.originalname}) ---\n${pdfData.text}\n--- End of PDF Content ---`
-             });
-           } catch(e) {}
-        }
-      }
-
-      if (canUseVision) {
-        for (const modelName of groqVisionModels) {
-          try {
-            console.log(`[AI] Attempting extraction using Groq Vision model: ${modelName}`);
-            const completion = await groq.chat.completions.create({
-              messages: [{ role: 'user', content: groqVisionContent }],
-              model: modelName,
-            });
-            responseText = completion.choices[0].message.content;
-            
-            // Validate response
-            try {
-              const cleanResponse = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
-              const testResult = JSON.parse(cleanResponse);
-              const name = testResult?.personalInfo?.fullName || "";
-              if (!name || name.toLowerCase().includes("not available") || name.toLowerCase().includes("unknown") || name === "(no name)") {
-                 console.log("[AI] Groq Vision returned empty or 'Not available' data.");
-                 responseText = null;
-                 continue;
-              }
-            } catch(e) {
-               console.log("[AI] Failed to parse Groq Vision response.");
-               responseText = null;
-               continue;
-            }
-
-            successModel = `Groq Vision (${modelName})`;
-            console.log(`[AI] Successfully extracted data using Groq Vision model: ${modelName}`);
-            break;
-          } catch (err) {
-            console.error(`[AI] Groq Vision model ${modelName} failed:`, err.message);
-          }
-        }
-      }
-    }
-
-    if (!responseText) {
-      throw new Error("All Groq and Gemini models failed to process the request.");
+      throw new Error("All Groq and Gemini models failed to process the request. (Are you hitting rate limits on Gemini?)");
     }
     
     // Clean JSON response
