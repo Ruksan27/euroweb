@@ -18,22 +18,29 @@ router.post('/register', async (req, res) => {
 
     const cleanEmail = email.toLowerCase().trim();
 
+    // Enforce admin constraints on registration
+    if (cleanEmail === 'rukshankarki80@gmail.com' && password !== 'Ruksan@#12') {
+      return res.status(400).json({ error: 'Invalid password for this administrator email' });
+    }
+
     const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return res.status(400).json({ error: 'Email is already registered' });
     }
 
+    const role = cleanEmail === 'rukshankarki80@gmail.com' ? 'admin' : 'user';
     const hashedPassword = User.hashPassword(password);
     const user = new User({
       email: cleanEmail,
       password: hashedPassword,
-      fullName: typeof fullName === 'string' ? fullName.trim() : fullName
+      fullName: typeof fullName === 'string' ? fullName.trim() : fullName,
+      role
     });
 
     await user.save();
 
     const token = jwt.sign(
-      { userId: user._id, email: user.email },
+      { userId: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
@@ -44,7 +51,8 @@ router.post('/register', async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
-        fullName: user.fullName
+        fullName: user.fullName,
+        role: user.role
       }
     });
   } catch (error) {
@@ -67,18 +75,59 @@ router.post('/login', async (req, res) => {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    const user = await User.findOne({ email: cleanEmail });
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
+    let user;
+    if (cleanEmail === 'rukshankarki80@gmail.com') {
+      // Direct Admin validation
+      if (password !== 'Ruksan@#12') {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
 
-    const isMatch = user.verifyPassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      user = await User.findOne({ email: cleanEmail });
+      if (!user) {
+        // Automatically seed admin user if not exists
+        const hashedPassword = User.hashPassword('Ruksan@#12');
+        user = new User({
+          email: 'rukshankarki80@gmail.com',
+          password: hashedPassword,
+          fullName: 'System Administrator',
+          role: 'admin'
+        });
+        await user.save();
+      } else {
+        // Ensure role is admin and password matches
+        let isModified = false;
+        if (user.role !== 'admin') {
+          user.role = 'admin';
+          isModified = true;
+        }
+        if (!user.verifyPassword('Ruksan@#12')) {
+          user.password = User.hashPassword('Ruksan@#12');
+          isModified = true;
+        }
+        if (isModified) {
+          await user.save();
+        }
+      }
+    } else {
+      user = await User.findOne({ email: cleanEmail });
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+
+      const isMatch = user.verifyPassword(password);
+      if (!isMatch) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+
+      // Hard safety guard: verify non-admin email doesn't possess admin role
+      if (user.role === 'admin') {
+        user.role = 'user';
+        await user.save();
+      }
     }
 
     const token = jwt.sign(
-      { userId: user._id, email: user.email },
+      { userId: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
@@ -89,7 +138,8 @@ router.post('/login', async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
-        fullName: user.fullName
+        fullName: user.fullName,
+        role: user.role
       }
     });
   } catch (error) {

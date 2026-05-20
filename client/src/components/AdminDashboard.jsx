@@ -480,157 +480,157 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
       {activeTab === 'users' ? (
         <UserManagement token={token} onLogout={onLogout} />
       ) : (
-      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 pb-6 sm:pb-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          {[
-            { label: 'Total CVs Submitted', value: cvs.length, icon: LucideFileText, color: 'indigo' },
-            { label: 'This Month', value: cvs.filter(c => new Date(c.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length, icon: LucideCalendar, color: 'emerald' },
-            { label: 'Today', value: cvs.filter(c => new Date(c.createdAt).toDateString() === new Date().toDateString()).length, icon: LucideUsers, color: 'violet' },
-          ].map((stat, i) => (
-            <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-3 sm:p-5 flex items-center gap-3 sm:gap-4">
-              <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-${stat.color}-500/20 rounded-xl flex items-center justify-center flex-shrink-0`}>
-                <stat.icon size={18} className={`text-${stat.color}-400`} />
-              </div>
-              <div>
-                <p className="text-2xl sm:text-3xl font-extrabold">{stat.value}</p>
-                <p className="text-slate-500 text-xs sm:text-sm">{stat.label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Search */}
-        <div className="relative mb-6">
-          <LucideSearch size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search by name or email..."
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-          />
-        </div>
-
-        {/* CV Table */}
-        {loading ? (
-          <div className="flex items-center justify-center py-32">
-            <LucideLoader2 size={36} className="animate-spin text-indigo-400" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-32 text-slate-500">
-            <LucideFileText size={48} className="mx-auto mb-4 opacity-30" />
-            <p className="text-lg">No CVs found</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {/* Mobile: Card Layout */}
-            <div className="md:hidden space-y-3">
-              {filtered.map((cv, index) => (
-                <div key={cv._id} className="bg-white/5 border border-white/10 rounded-2xl p-4 animate-fadeIn">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-sm flex-shrink-0">
-                        {cv.personalInfo?.fullName?.[0]?.toUpperCase() || '?'}
-                      </div>
-                      <div>
-                        <p className="text-white font-semibold text-sm">{cv.personalInfo?.fullName || '—'}</p>
-                        <p className="text-slate-400 text-xs">{cv.personalInfo?.email || '—'}</p>
-                      </div>
-                    </div>
-                    <span className="text-slate-500 text-xs">{new Date(cv.createdAt).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {(cv.digitalSkills || []).slice(0, 3).map((s, i) => (
-                      <span key={i} className="bg-indigo-500/20 text-indigo-300 text-xs px-2 py-0.5 rounded-full">{s}</span>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/5">
-                    <button onClick={() => setSelectedCV(cv)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 transition text-xs font-medium">
-                      <LucideEye size={14} /> View
-                    </button>
-                    <button onClick={() => onEditCV && onEditCV(cv)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition text-xs font-medium">
-                      <LucideEdit size={14} /> Edit
-                    </button>
-                    <button onClick={() => handleDownload(cv._id)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition text-xs font-medium">
-                      <LucideDownload size={14} /> PDF
-                    </button>
-                    <button onClick={() => handleDelete(cv._id)} disabled={deletingId === cv._id} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition text-xs font-medium disabled:opacity-50">
-                      {deletingId === cv._id ? <LucideLoader2 size={14} className="animate-spin" /> : <LucideTrash2 size={14} />} Del
-                    </button>
-                  </div>
+        <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 pb-6 sm:pb-8">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            {[
+              { label: 'Total CVs Submitted', value: cvs.length, icon: LucideFileText, color: 'indigo' },
+              { label: 'This Month', value: cvs.filter(c => new Date(c.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length, icon: LucideCalendar, color: 'emerald' },
+              { label: 'Today', value: cvs.filter(c => new Date(c.createdAt).toDateString() === new Date().toDateString()).length, icon: LucideUsers, color: 'violet' },
+            ].map((stat, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-3 sm:p-5 flex items-center gap-3 sm:gap-4">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-${stat.color}-500/20 rounded-xl flex items-center justify-center flex-shrink-0`}>
+                  <stat.icon size={18} className={`text-${stat.color}-400`} />
                 </div>
-              ))}
-            </div>
+                <div>
+                  <p className="text-2xl sm:text-3xl font-extrabold">{stat.value}</p>
+                  <p className="text-slate-500 text-xs sm:text-sm">{stat.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
 
-            {/* Desktop: Table Layout */}
-            <div className="hidden md:block bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-white/10 text-slate-400 text-sm">
-                      <th className="text-left px-5 py-4 font-medium">#</th>
-                      <th className="text-left px-5 py-4 font-medium">Full Name</th>
-                      <th className="text-left px-5 py-4 font-medium">Email</th>
-                      <th className="text-left px-5 py-4 font-medium">Phone</th>
-                      <th className="text-left px-5 py-4 font-medium">Submitted</th>
-                      <th className="text-left px-5 py-4 font-medium">Skills</th>
-                      <th className="text-right px-5 py-4 font-medium">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {filtered.map((cv, index) => (
-                      <tr key={cv._id} className="hover:bg-white/5 transition">
-                        <td className="px-5 py-4 text-slate-500 text-sm">{index + 1}</td>
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-sm flex-shrink-0">
-                              {cv.personalInfo?.fullName?.[0]?.toUpperCase() || '?'}
-                            </div>
-                            <span className="text-white font-medium">{cv.personalInfo?.fullName || '—'}</span>
-                          </div>
-                        </td>
-                        <td className="px-5 py-4 text-slate-300 text-sm">{cv.personalInfo?.email || '—'}</td>
-                        <td className="px-5 py-4 text-slate-300 text-sm">{cv.personalInfo?.phone || '—'}</td>
-                        <td className="px-5 py-4 text-slate-400 text-sm">{new Date(cv.createdAt).toLocaleDateString()}</td>
-                        <td className="px-5 py-4">
-                          <div className="flex flex-wrap gap-1">
-                            {(cv.digitalSkills || []).slice(0, 2).map((s, i) => (
-                              <span key={i} className="bg-indigo-500/20 text-indigo-300 text-xs px-2 py-0.5 rounded-full">{s}</span>
-                            ))}
-                            {(cv.digitalSkills?.length || 0) > 2 && <span className="text-slate-500 text-xs">+{cv.digitalSkills.length - 2}</span>}
-                          </div>
-                        </td>
-                        <td className="px-5 py-4">
-                          <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => setSelectedCV(cv)} className="p-2 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 transition" title="View">
-                              <LucideEye size={15} />
-                            </button>
-                            <button onClick={() => onEditCV && onEditCV(cv)} className="p-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition" title="Edit">
-                              <LucideEdit size={15} />
-                            </button>
-                            <button onClick={() => handleDownload(cv._id)} className="p-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition" title="PDF">
-                              <LucideDownload size={15} />
-                            </button>
-                            <button onClick={() => handleDelete(cv._id)} disabled={deletingId === cv._id} className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition disabled:opacity-50" title="Delete">
-                              {deletingId === cv._id ? <LucideLoader2 size={15} className="animate-spin" /> : <LucideTrash2 size={15} />}
-                            </button>
-                          </div>
-                        </td>
+          {/* Search */}
+          <div className="relative mb-6">
+            <LucideSearch size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search by name or email..."
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+            />
+          </div>
+
+          {/* CV Table */}
+          {loading ? (
+            <div className="flex items-center justify-center py-32">
+              <LucideLoader2 size={36} className="animate-spin text-indigo-400" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-32 text-slate-500">
+              <LucideFileText size={48} className="mx-auto mb-4 opacity-30" />
+              <p className="text-lg">No CVs found</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {/* Mobile: Card Layout */}
+              <div className="md:hidden space-y-3">
+                {filtered.map((cv, index) => (
+                  <div key={cv._id} className="bg-white/5 border border-white/10 rounded-2xl p-4 animate-fadeIn">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-sm flex-shrink-0">
+                          {cv.personalInfo?.fullName?.[0]?.toUpperCase() || '?'}
+                        </div>
+                        <div>
+                          <p className="text-white font-semibold text-sm">{cv.personalInfo?.fullName || '—'}</p>
+                          <p className="text-slate-400 text-xs">{cv.personalInfo?.email || '—'}</p>
+                        </div>
+                      </div>
+                      <span className="text-slate-500 text-xs">{new Date(cv.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {(cv.digitalSkills || []).slice(0, 3).map((s, i) => (
+                        <span key={i} className="bg-indigo-500/20 text-indigo-300 text-xs px-2 py-0.5 rounded-full">{s}</span>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/5">
+                      <button onClick={() => setSelectedCV(cv)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 transition text-xs font-medium">
+                        <LucideEye size={14} /> View
+                      </button>
+                      <button onClick={() => onEditCV && onEditCV(cv)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition text-xs font-medium">
+                        <LucideEdit size={14} /> Edit
+                      </button>
+                      <button onClick={() => handleDownload(cv._id)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition text-xs font-medium">
+                        <LucideDownload size={14} /> PDF
+                      </button>
+                      <button onClick={() => handleDelete(cv._id)} disabled={deletingId === cv._id} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition text-xs font-medium disabled:opacity-50">
+                        {deletingId === cv._id ? <LucideLoader2 size={14} className="animate-spin" /> : <LucideTrash2 size={14} />} Del
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop: Table Layout */}
+              <div className="hidden md:block bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-white/10 text-slate-400 text-sm">
+                        <th className="text-left px-5 py-4 font-medium">#</th>
+                        <th className="text-left px-5 py-4 font-medium">Full Name</th>
+                        <th className="text-left px-5 py-4 font-medium">Email</th>
+                        <th className="text-left px-5 py-4 font-medium">Phone</th>
+                        <th className="text-left px-5 py-4 font-medium">Submitted</th>
+                        <th className="text-left px-5 py-4 font-medium">Skills</th>
+                        <th className="text-right px-5 py-4 font-medium">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {filtered.map((cv, index) => (
+                        <tr key={cv._id} className="hover:bg-white/5 transition">
+                          <td className="px-5 py-4 text-slate-500 text-sm">{index + 1}</td>
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-sm flex-shrink-0">
+                                {cv.personalInfo?.fullName?.[0]?.toUpperCase() || '?'}
+                              </div>
+                              <span className="text-white font-medium">{cv.personalInfo?.fullName || '—'}</span>
+                            </div>
+                          </td>
+                          <td className="px-5 py-4 text-slate-300 text-sm">{cv.personalInfo?.email || '—'}</td>
+                          <td className="px-5 py-4 text-slate-300 text-sm">{cv.personalInfo?.phone || '—'}</td>
+                          <td className="px-5 py-4 text-slate-400 text-sm">{new Date(cv.createdAt).toLocaleDateString()}</td>
+                          <td className="px-5 py-4">
+                            <div className="flex flex-wrap gap-1">
+                              {(cv.digitalSkills || []).slice(0, 2).map((s, i) => (
+                                <span key={i} className="bg-indigo-500/20 text-indigo-300 text-xs px-2 py-0.5 rounded-full">{s}</span>
+                              ))}
+                              {(cv.digitalSkills?.length || 0) > 2 && <span className="text-slate-500 text-xs">+{cv.digitalSkills.length - 2}</span>}
+                            </div>
+                          </td>
+                          <td className="px-5 py-4">
+                            <div className="flex items-center justify-end gap-2">
+                              <button onClick={() => setSelectedCV(cv)} className="p-2 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 transition" title="View">
+                                <LucideEye size={15} />
+                              </button>
+                              <button onClick={() => onEditCV && onEditCV(cv)} className="p-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition" title="Edit">
+                                <LucideEdit size={15} />
+                              </button>
+                              <button onClick={() => handleDownload(cv._id)} className="p-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition" title="PDF">
+                                <LucideDownload size={15} />
+                              </button>
+                              <button onClick={() => handleDelete(cv._id)} disabled={deletingId === cv._id} className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition disabled:opacity-50" title="Delete">
+                                {deletingId === cv._id ? <LucideLoader2 size={15} className="animate-spin" /> : <LucideTrash2 size={15} />}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* CV Detail Modal */}
       {selectedCV && (
         <CVModal cv={selectedCV} token={token} onClose={() => setSelectedCV(null)} />
-      )}
       )}
     </div>
   );

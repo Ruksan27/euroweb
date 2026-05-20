@@ -9,9 +9,28 @@ import Auth from './components/Auth'
 
 function App() {
   const [view, setView] = useState('landing')
-  const [adminToken, setAdminToken] = useState(() => localStorage.getItem('admin_token') || null)
+  const [adminToken, setAdminToken] = useState(() => {
+    const uToken = localStorage.getItem('user_token');
+    const uDataRaw = localStorage.getItem('user_data');
+    if (uToken && uDataRaw) {
+      try {
+        const uData = JSON.parse(uDataRaw);
+        if (uData.role === 'admin') return uToken;
+      } catch (e) {}
+    }
+    return localStorage.getItem('admin_token') || null;
+  })
   const [userToken, setUserToken] = useState(() => localStorage.getItem('user_token') || null)
   const [editingCV, setEditingCV] = useState(null)
+
+  const handleLogoutAll = () => {
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('user_token');
+    localStorage.removeItem('user_data');
+    setAdminToken(null);
+    setUserToken(null);
+    setView('landing');
+  };
 
   // Admin route check
   if (window.location.hash === '#admin' || view === 'admin-login' || view === 'admin') {
@@ -20,7 +39,7 @@ function App() {
         <>
           <Toaster position="top-right" />
           <AdminDashboard 
-            onLogout={() => { setAdminToken(null); setView('landing'); }} 
+            onLogout={handleLogoutAll} 
             onEditCV={(cv) => { setEditingCV(cv); setView('builder'); }}
           />
         </>
@@ -29,7 +48,11 @@ function App() {
     return (
       <>
         <Toaster position="top-right" />
-        <AdminLogin onLogin={(token) => { setAdminToken(token); setView('admin'); }} />
+        <AdminLogin onLogin={(token) => { 
+          localStorage.setItem('admin_token', token);
+          setAdminToken(token); 
+          setView('admin'); 
+        }} />
       </>
     )
   }
@@ -69,6 +92,10 @@ function App() {
           <Auth 
             onAuthSuccess={(token, user) => {
               setUserToken(token);
+              if (user && user.role === 'admin') {
+                localStorage.setItem('admin_token', token);
+                setAdminToken(token);
+              }
               setView('dashboard');
             }}
             onBack={() => setView('landing')}
@@ -77,12 +104,7 @@ function App() {
           <CVBuilder initialData={editingCV} />
         ) : (
           <Dashboard 
-            onLogout={() => {
-              localStorage.removeItem('user_token');
-              localStorage.removeItem('user_data');
-              setUserToken(null);
-              setView('landing');
-            }} 
+            onLogout={handleLogoutAll} 
           />
         )}
       </div>
