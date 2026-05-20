@@ -508,8 +508,14 @@ const CVBuilder = ({ initialData }) => {
           {/* Work Experience */}
           <section className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold flex items-center gap-2"><LucideBriefcase size={20} className="text-fuchsia-400" /> Work Experience</h3>
-              <button onClick={() => addList('workExperience', { occupation: '', employer: '', city: '', country: '', from: '', to: '', responsibilities: [] })} className="p-1.5 hover:bg-white/10 rounded-lg text-fuchsia-400 transition"><LucidePlus size={20} /></button>
+              <div className="flex items-center gap-4 flex-wrap">
+                <h3 className="text-lg font-bold flex items-center gap-2"><LucideBriefcase size={20} className="text-fuchsia-400" /> Work Experience</h3>
+                <label className="cursor-pointer bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1 whitespace-nowrap">
+                  <LucideSparkles size={14} /> AI Auto-fill (Max 5)
+                  <input type="file" multiple accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={(e) => handleSectionAIExtract(e, 'workExperience')} />
+                </label>
+              </div>
+              <button onClick={() => addList('workExperience', { occupation: '', employer: '', city: '', country: '', from: '', to: '', responsibilities: [], documentUrl: '', documentName: '' })} className="p-1.5 hover:bg-white/10 rounded-lg text-fuchsia-400 transition" title="Add Experience Manually"><LucidePlus size={20} /></button>
             </div>
             {cvData.workExperience.map((exp, i) => (
               <div key={i} className="bg-black/20 border border-white/10 rounded-xl p-4 mb-4 relative">
@@ -528,17 +534,61 @@ const CVBuilder = ({ initialData }) => {
                 </div>
                 <textarea
                   placeholder="Responsibilities (one per line)"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm focus:border-fuchsia-400 outline-none min-h-[80px]"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm focus:border-fuchsia-400 outline-none min-h-[80px] mb-3"
                   value={exp.responsibilities.join('\n')}
                   onChange={(e) => updateList('workExperience', i, 'responsibilities', e.target.value.split('\n'))}
                 />
+                <div className="flex items-center gap-3">
+                  <label className="cursor-pointer text-xs flex items-center gap-1 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition">
+                    <LucideFileText size={14} /> Upload Doc
+                    <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" onChange={async (e) => {
+                      const doc = await handleDocUpload(e.target.files[0], 'experience');
+                      if (doc) { updateList('workExperience', i, 'documentUrl', doc.url); updateList('workExperience', i, 'documentName', doc.name); }
+                    }} />
+                  </label>
+                  {exp.documentName && (
+                    <a href={exp.documentUrl} target="_blank" rel="noreferrer" className="text-xs text-emerald-400 hover:text-emerald-300 truncate max-w-[150px] flex items-center gap-1 underline underline-offset-2">
+                      <LucideFileText size={12} /> Preview {exp.documentName}
+                    </a>
+                  )}
+                </div>
               </div>
             ))}
           </section>
 
           {/* Skills */}
           <section className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
-            <h3 className="text-lg font-bold mb-5 flex items-center gap-2"><LucideWrench size={20} className="text-blue-400" /> Skills</h3>
+            <div className="flex justify-between items-center mb-5">
+              <div className="flex items-center gap-4 flex-wrap">
+                <h3 className="text-lg font-bold flex items-center gap-2"><LucideWrench size={20} className="text-blue-400" /> Skills</h3>
+                <label className="cursor-pointer bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1 whitespace-nowrap">
+                  <LucideSparkles size={14} /> AI Auto-fill (Max 5)
+                  <input type="file" multiple accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={async (e) => {
+                    const files = e.target.files;
+                    if (!files || files.length === 0) return;
+                    const formData = new FormData();
+                    for (let i = 0; i < files.length; i++) formData.append('documents', files[i]);
+                    setLoading(true);
+                    const toastId = toast.loading('AI is extracting skills...');
+                    try {
+                      const response = await axios.post(`${API.ai}/extract`, formData);
+                      const aiData = response.data;
+                      setCvData(prev => ({
+                        ...prev,
+                        digitalSkills: [...new Set([...prev.digitalSkills, ...(aiData.digitalSkills || [])])],
+                        otherSkills: [...new Set([...prev.otherSkills, ...(aiData.otherSkills || [])])],
+                      }));
+                      toast.success('Skills extracted successfully!', { id: toastId });
+                    } catch (error) {
+                      toast.error(`AI Extraction failed: ${error.response?.data?.error || error.message}`, { id: toastId });
+                    } finally {
+                      setLoading(false);
+                      e.target.value = null;
+                    }
+                  }} />
+                </label>
+              </div>
+            </div>
             <div className="space-y-5">
               <div>
                 <label className="text-sm text-slate-300 block mb-2 font-medium">Digital Skills (Comma separated)</label>
