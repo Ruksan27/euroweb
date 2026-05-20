@@ -118,13 +118,7 @@ function App() {
               Sign In
             </button>
           )}
-          <button
-            onClick={() => setView('admin-login')}
-            className="flex items-center gap-1.5 text-slate-500 hover:text-indigo-400 transition-colors text-sm px-2 py-1.5 rounded-lg hover:bg-white/5"
-          >
-            <LucideShield size={15} />
-            <span className="hidden sm:inline">Admin</span>
-          </button>
+
           <button
             onClick={() => { setEditingCV(null); setView('builder') }}
             className="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-5 py-2 rounded-lg font-semibold text-sm transition-all hover:scale-105 active:scale-95"
