@@ -3,7 +3,7 @@ const User = require('../models/User');
 require('dotenv').config();
 
 async function seed() {
-  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/europass';
+  const uri = process.env.MONGODB_URI || 'mongodb+srv://rukshankarki80_db_user:Xg6CjM1K4Ix1RP9o@cluster0.phcw9qg.mongodb.net/europass';
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
   console.log('Connected to MongoDB');
 
