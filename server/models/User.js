@@ -16,12 +16,15 @@ function normalizeGmailAddress(email) {
 
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, lowercase: true, trim: true },
-  normalizedEmail: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  normalizedEmail: { type: String, required: true, lowercase: true, trim: true },
   password: { type: String, required: true },
   fullName: { type: String, trim: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   createdAt: { type: Date, default: Date.now }
 });
+
+// Ensure unique index on normalizedEmail
+UserSchema.index({ normalizedEmail: 1 }, { unique: true, background: false });
 
 // Ensure normalizedEmail is present before validation/save
 UserSchema.pre('validate', function() {
