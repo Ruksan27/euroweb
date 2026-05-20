@@ -123,6 +123,40 @@ const CVBuilder = ({ initialData }) => {
     }
   };
 
+  // --- AI Extract Section-wise ---
+  const handleSectionAIExtract = async (e, section) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    if (files.length > 5) {
+      toast.error('You can upload a maximum of 5 documents at a time.');
+      return;
+    }
+
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('documents', files[i]);
+    }
+
+    setLoading(true);
+    const toastId = toast.loading(`AI is extracting data for ${section}...`);
+    try {
+      const response = await axios.post(`${API.ai}/extract`, formData);
+      const aiData = response.data;
+      
+      setCvData(prev => ({
+        ...prev,
+        [section]: [...(prev[section] || []), ...(aiData[section] || [])],
+        documents: [...(prev.documents || []), ...(aiData.documents || [])]
+      }));
+      toast.success(`Data extracted for ${section}.`, { id: toastId });
+    } catch (error) {
+      toast.error(`AI Extraction failed: ${error.response?.data?.error || error.message}`, { id: toastId });
+    } finally {
+      setLoading(false);
+      e.target.value = null; // reset file input
+    }
+  };
+
   const handleSave = async () => {
     if (!cvData.personalInfo.fullName?.trim()) {
       toast.error('Please enter your full name before saving');
@@ -330,8 +364,14 @@ const CVBuilder = ({ initialData }) => {
           {/* Education & Cert Uploads */}
           <section className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold flex items-center gap-2"><LucideGraduationCap size={20} className="text-amber-400" /> Education</h3>
-              <button onClick={() => addList('education', { qualification: '', organization: '', city: '', country: '', from: '', to: '', website: '', fieldOfStudy: '', eqfLevel: '' })} className="p-1.5 hover:bg-white/10 rounded-lg text-amber-400 transition"><LucidePlus size={20} /></button>
+              <div className="flex items-center gap-4 flex-wrap">
+                <h3 className="text-lg font-bold flex items-center gap-2"><LucideGraduationCap size={20} className="text-amber-400" /> Education</h3>
+                <label className="cursor-pointer bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1 whitespace-nowrap">
+                  <LucideSparkles size={14} /> AI Auto-fill (Max 5)
+                  <input type="file" multiple accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={(e) => handleSectionAIExtract(e, 'education')} />
+                </label>
+              </div>
+              <button onClick={() => addList('education', { qualification: '', organization: '', city: '', country: '', from: '', to: '', website: '', fieldOfStudy: '', eqfLevel: '' })} className="p-1.5 hover:bg-white/10 rounded-lg text-amber-400 transition" title="Add Education Manually"><LucidePlus size={20} /></button>
             </div>
             {cvData.education.map((edu, i) => (
               <div key={i} className="bg-black/20 border border-white/10 rounded-xl p-4 mb-4 relative">
@@ -390,8 +430,14 @@ const CVBuilder = ({ initialData }) => {
           {/* Certificates */}
           <section className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold flex items-center gap-2"><LucideAward size={20} className="text-rose-400" /> Extra Certificates</h3>
-              <button onClick={() => addList('certificates', { title: '', issuer: '', date: '' })} className="p-1.5 hover:bg-white/10 rounded-lg text-rose-400 transition"><LucidePlus size={20} /></button>
+              <div className="flex items-center gap-4 flex-wrap">
+                <h3 className="text-lg font-bold flex items-center gap-2"><LucideAward size={20} className="text-rose-400" /> Extra Certificates</h3>
+                <label className="cursor-pointer bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1 whitespace-nowrap">
+                  <LucideSparkles size={14} /> AI Auto-fill (Max 5)
+                  <input type="file" multiple accept=".pdf,.png,.jpg,.jpeg" className="hidden" onChange={(e) => handleSectionAIExtract(e, 'certificates')} />
+                </label>
+              </div>
+              <button onClick={() => addList('certificates', { title: '', issuer: '', date: '' })} className="p-1.5 hover:bg-white/10 rounded-lg text-rose-400 transition" title="Add Certificate Manually"><LucidePlus size={20} /></button>
             </div>
             {cvData.certificates.map((cert, i) => (
               <div key={i} className="bg-black/20 border border-white/10 rounded-xl p-4 mb-4 relative">
