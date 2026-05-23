@@ -145,6 +145,18 @@ const generateHTML = (data) => {
           `).join('')}
         </div>` : ''}
 
+        ${(data.certificates && data.certificates.length > 0) ? `
+        <div class="section">
+          <div class="section-title">CERTIFICATES</div>
+          <div class="section-line"></div>
+          ${data.certificates.map(cert => `
+            <div class="edu-item">
+              <div class="edu-title">${cert.title || ''}</div>
+              <div class="edu-org">${cert.issuer || ''} <span>[ ${cert.date || ''} ]</span></div>
+            </div>
+          `).join('')}
+        </div>` : ''}
+
         ${(data.workExperience && data.workExperience.length > 0) ? `
         <div class="section">
           <div class="section-title">WORK EXPERIENCE</div>
@@ -277,6 +289,19 @@ const generateHTML = (data) => {
           </div>
         `).join('')}
         ` : ''}
+
+        ${(data.certificates?.length) ? `
+        <div class="main-title">Certifications</div>
+        ${data.certificates.map(cert => `
+          <div class="main-item">
+            <div class="main-item-head">
+              <div class="main-item-title">${cert.title}</div>
+              <div class="main-item-date">${cert.date || ''}</div>
+            </div>
+            <div class="main-item-sub">${cert.issuer}</div>
+          </div>
+        `).join('')}
+        ` : ''}
       </div>
     `;
   }
@@ -346,6 +371,20 @@ const generateHTML = (data) => {
             <div class="content-min">
               <h3>${edu.qualification}</h3>
               <h4>${edu.organization}</h4>
+            </div>
+          </div>
+        `).join('')}
+      </div>` : ''}
+
+      ${(data.certificates?.length) ? `
+      <div class="section-min">
+        <div class="title-min">Certifications</div>
+        ${data.certificates.map(cert => `
+          <div class="item-min">
+            <div class="date-min">${cert.date || ''}</div>
+            <div class="content-min">
+              <h3>${cert.title}</h3>
+              <h4>${cert.issuer}</h4>
             </div>
           </div>
         `).join('')}
@@ -449,6 +488,182 @@ const generateHTML = (data) => {
           <strong>Other:</strong> ${(data.otherSkills || []).join(', ')}
         </div>
       </div>` : ''}
+    `;
+  }
+
+  else if (format === 'plain') {
+    // -------------------------------------------------------------------------
+    // PLAIN TEMPLATE (No photos, clean text only, professional)
+    // -------------------------------------------------------------------------
+    css = `
+      .page { padding: 50px 60px; color: #000; font-family: "Times New Roman", Times, serif; }
+      .header-plain { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+      .header-plain h1 { font-size: 26px; text-transform: uppercase; margin-bottom: 8px; font-weight: bold; }
+      .header-plain .contact { font-size: 11px; }
+      .section-title { font-size: 14px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000; margin-bottom: 10px; padding-bottom: 2px; }
+      .section-plain { margin-bottom: 15px; }
+      .item-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; }
+      .item-sub { font-style: italic; font-size: 11px; margin-bottom: 4px; }
+      .item-ul { padding-left: 20px; font-size: 11px; margin-bottom: 10px; list-style-type: disc; }
+      .skills-text { font-size: 11px; margin-bottom: 10px; }
+    `;
+
+    bodyContent = `
+      <div class="header-plain">
+        <h1>${p.fullName || 'YOUR NAME'}</h1>
+        <div class="contact">
+          ${[p.address, p.city, p.country, p.phone, p.email, p.linkedIn].filter(Boolean).join(' | ')}
+        </div>
+      </div>
+      
+      ${p.aboutMe ? `
+      <div class="section-plain">
+        <div class="section-title">Summary</div>
+        <div style="font-size: 11px; line-height: 1.5;">${p.aboutMe}</div>
+      </div>` : ''}
+
+      ${(data.workExperience?.length) ? `
+      <div class="section-plain">
+        <div class="section-title">Experience</div>
+        ${data.workExperience.map(exp => `
+          <div class="item-header">
+            <span>${exp.occupation}</span>
+            <span>${exp.from} - ${exp.to}</span>
+          </div>
+          <div class="item-sub">${exp.employer} ${exp.city ? ', ' + exp.city : ''}</div>
+          ${exp.responsibilities?.length ? `<ul class="item-ul">${exp.responsibilities.filter(Boolean).map(r => `<li>${r}</li>`).join('')}</ul>` : '<div style="margin-bottom:10px;"></div>'}
+        `).join('')}
+      </div>` : ''}
+
+      ${(data.education?.length) ? `
+      <div class="section-plain">
+        <div class="section-title">Education</div>
+        ${data.education.map(edu => `
+          <div class="item-header">
+            <span>${edu.qualification}</span>
+            <span>${edu.from} - ${edu.to}</span>
+          </div>
+          <div class="item-sub">${edu.organization} ${edu.city ? ', ' + edu.city : ''}</div>
+          <div style="margin-bottom:10px;"></div>
+        `).join('')}
+      </div>` : ''}
+      
+      ${(data.certificates?.length) ? `
+      <div class="section-plain">
+        <div class="section-title">Certifications</div>
+        ${data.certificates.map(cert => `
+          <div class="item-header">
+            <span>${cert.title}</span>
+            <span>${cert.date || ''}</span>
+          </div>
+          <div class="item-sub">${cert.issuer}</div>
+          <div style="margin-bottom:6px;"></div>
+        `).join('')}
+      </div>` : ''}
+
+      ${(data.digitalSkills?.length || data.otherSkills?.length) ? `
+      <div class="section-plain">
+        <div class="section-title">Skills</div>
+        <div class="skills-text">
+          ${(data.digitalSkills || []).concat(data.otherSkills || []).join(', ')}
+        </div>
+      </div>` : ''}
+    `;
+  }
+
+  else if (format === 'elegant') {
+    // -------------------------------------------------------------------------
+    // ELEGANT TEMPLATE (Two columns, soft background, elegant typography)
+    // -------------------------------------------------------------------------
+    css = `
+      .page { display: flex; min-height: 297mm; font-family: 'Inter', sans-serif; background: #fafafa; }
+      .left-col { width: 35%; background: ${themeColor}; color: rgba(255,255,255,0.9); padding: 40px 25px; }
+      .right-col { width: 65%; padding: 40px 35px; background: #ffffff; }
+      .left-col a { color: #fff; text-decoration: none; }
+      .photo-wrap { text-align: center; margin-bottom: 20px; }
+      .photo-wrap img, .photo-wrap .no-photo { width: 130px; height: 130px; object-fit: cover; border-radius: 50%; border: 3px solid rgba(255,255,255,0.3); margin: 0 auto; display: block; }
+      .photo-wrap .no-photo { background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+      .name-text { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 5px; color: #fff; letter-spacing: 1px; }
+      .role-text { text-align: center; font-size: 12px; font-weight: 300; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; }
+      
+      .side-head { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 1px solid rgba(255,255,255,0.2); margin-bottom: 15px; padding-bottom: 5px; margin-top: 25px; color: #fff; }
+      .side-item { font-size: 11px; margin-bottom: 10px; line-height: 1.5; }
+      .side-item strong { display: block; font-size: 10px; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 2px; }
+      
+      .main-head { font-size: 18px; font-weight: 700; color: ${themeColor}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 5px; }
+      .main-block { margin-bottom: 20px; }
+      .mb-title { font-size: 14px; font-weight: 700; color: #333; display: flex; justify-content: space-between; }
+      .mb-date { font-size: 11px; font-weight: 600; color: ${themeColor}; }
+      .mb-sub { font-size: 12px; font-style: italic; color: #777; margin-bottom: 8px; }
+      .mb-text { font-size: 11.5px; color: #555; line-height: 1.6; }
+      .mb-ul { padding-left: 18px; list-style: disc; margin-top: 5px; }
+      .mb-ul li { margin-bottom: 4px; }
+      .skill-pill { display: inline-block; background: #f0f0f0; color: #444; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; margin: 0 4px 6px 0; }
+    `;
+
+    bodyContent = `
+      <div class="left-col">
+        <div class="photo-wrap">
+          ${data.photoUrl ? `<img src="${data.photoUrl}" style="border-radius: ${photoRadius}" />` : `<div class="no-photo" style="border-radius: ${photoRadius}">👤</div>`}
+        </div>
+        <div class="name-text">${p.fullName || 'YOUR NAME'}</div>
+        <div class="role-text">${p.nationality || 'Professional'}</div>
+        
+        <div class="side-head">Contact</div>
+        ${p.phone ? `<div class="side-item"><strong>Phone</strong>${p.phone}</div>` : ''}
+        ${p.email ? `<div class="side-item"><strong>Email</strong>${p.email}</div>` : ''}
+        ${(p.address || p.city) ? `<div class="side-item"><strong>Address</strong>${[p.address, p.city, p.country].filter(Boolean).join(', ')}</div>` : ''}
+        ${p.linkedIn ? `<div class="side-item"><strong>LinkedIn</strong>${p.linkedIn}</div>` : ''}
+        
+        ${(data.digitalSkills?.length || data.otherSkills?.length) ? `
+        <div class="side-head">Skills</div>
+        <div class="side-item" style="line-height: 1.8;">
+          ${(data.digitalSkills || []).concat(data.otherSkills || []).join('<br>')}
+        </div>` : ''}
+        
+        ${(data.languages?.length) ? `
+        <div class="side-head">Languages</div>
+        ${data.languages.map(l => `<div class="side-item"><strong>${l.language}</strong>${l.listening || 'Proficient'}</div>`).join('')}
+        ` : ''}
+      </div>
+      <div class="right-col">
+        ${p.aboutMe ? `
+        <div class="main-head">Profile</div>
+        <div class="main-block mb-text" style="font-style: italic;">
+          "${p.aboutMe}"
+        </div>` : ''}
+        
+        ${(data.workExperience?.length) ? `
+        <div class="main-head">Experience</div>
+        ${data.workExperience.map(exp => `
+          <div class="main-block">
+            <div class="mb-title"><span>${exp.occupation}</span><span class="mb-date">${exp.from} - ${exp.to}</span></div>
+            <div class="mb-sub">${exp.employer} ${exp.city ? ' | ' + exp.city : ''}</div>
+            ${exp.responsibilities?.length ? `<ul class="mb-ul mb-text">${exp.responsibilities.filter(Boolean).map(r => `<li>${r}</li>`).join('')}</ul>` : ''}
+          </div>
+        `).join('')}
+        ` : ''}
+        
+        ${(data.education?.length) ? `
+        <div class="main-head">Education</div>
+        ${data.education.map(edu => `
+          <div class="main-block">
+            <div class="mb-title"><span>${edu.qualification}</span><span class="mb-date">${edu.from} - ${edu.to}</span></div>
+            <div class="mb-sub">${edu.organization} ${edu.city ? ' | ' + edu.city : ''}</div>
+          </div>
+        `).join('')}
+        ` : ''}
+        
+        ${(data.certificates?.length) ? `
+        <div class="main-head">Certifications</div>
+        ${data.certificates.map(cert => `
+          <div class="main-block" style="margin-bottom: 12px;">
+            <div class="mb-title"><span>${cert.title}</span><span class="mb-date">${cert.date || ''}</span></div>
+            <div class="mb-sub">${cert.issuer}</div>
+          </div>
+        `).join('')}
+        ` : ''}
+      </div>
     `;
   }
 

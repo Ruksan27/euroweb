@@ -292,8 +292,8 @@ const CVBuilder = ({ initialData }) => {
                 </div>
 
                 <label className="text-sm text-slate-400 block mt-4 mb-1">CV Template Format</label>
-                <div className="flex gap-3">
-                  {['europass', 'modern', 'minimal', 'general'].map(fmt => (
+                <div className="flex flex-wrap gap-3">
+                  {['europass', 'modern', 'minimal', 'general', 'plain', 'elegant'].map(fmt => (
                     <button
                       key={fmt}
                       onClick={() => setCvData(p => ({ ...p, cvFormat: fmt }))}
@@ -596,8 +596,9 @@ const CVBuilder = ({ initialData }) => {
                   type="text"
                   placeholder="e.g. Microsoft Office, Photoshop, Python, Excel"
                   className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 focus:border-blue-500 outline-none text-white text-sm"
-                  value={cvData.digitalSkills.join(', ')}
-                  onChange={(e) => setCvData({ ...cvData, digitalSkills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                  value={cvData._rawDigitalSkills !== undefined ? cvData._rawDigitalSkills : cvData.digitalSkills.join(', ')}
+                  onChange={(e) => setCvData({ ...cvData, _rawDigitalSkills: e.target.value, digitalSkills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                  onBlur={() => setCvData(prev => ({ ...prev, _rawDigitalSkills: undefined }))}
                 />
               </div>
               <div className="mt-4">
@@ -606,8 +607,9 @@ const CVBuilder = ({ initialData }) => {
                   type="text"
                   placeholder="e.g. Communication, Leadership, Public Speaking"
                   className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 focus:border-blue-500 outline-none text-white text-sm"
-                  value={cvData.otherSkills.join(', ')}
-                  onChange={(e) => setCvData({ ...cvData, otherSkills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                  value={cvData._rawOtherSkills !== undefined ? cvData._rawOtherSkills : cvData.otherSkills.join(', ')}
+                  onChange={(e) => setCvData({ ...cvData, _rawOtherSkills: e.target.value, otherSkills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                  onBlur={() => setCvData(prev => ({ ...prev, _rawOtherSkills: undefined }))}
                 />
               </div>
             </div>
@@ -744,6 +746,19 @@ const CVBuilder = ({ initialData }) => {
                       ))}
                     </div>
                   )}
+
+                  {cvData.certificates.length > 0 && (
+                    <div>
+                      <div className="text-[9.5px] font-bold uppercase tracking-wider" style={{ color: cvData.themeColor || '#0e4a8e' }}>Extra Certificates</div>
+                      <div className="border-b my-1" style={{ borderColor: cvData.themeColor || '#0e4a8e' }}></div>
+                      {cvData.certificates.slice(0, 3).map((cert, i) => (
+                        <div key={i} className="mb-2.5">
+                          <div className="text-[10px] font-bold text-gray-800">{cert.title}</div>
+                          <div className="text-[9px] text-gray-500 font-semibold italic">{cert.issuer} <span className="text-[8px] font-normal not-italic">[{cert.date}]</span></div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </>
             ) : (
@@ -789,6 +804,17 @@ const CVBuilder = ({ initialData }) => {
                         <div key={i} className="mb-2 flex gap-2">
                           <div className="text-[8px] text-gray-400 w-14 shrink-0">{edu.from}{edu.to ? `–${edu.to}` : ''}</div>
                           <div><div className="text-[10px] font-bold">{edu.qualification}</div><div className="text-[9px] text-gray-500">{edu.organization}</div></div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {cvData.certificates.length > 0 && (
+                    <div>
+                      <div className="text-[#0055a6] text-[9px] font-bold uppercase border-b-2 border-[#0055a6] pb-1 mb-2">Certificates</div>
+                      {cvData.certificates.slice(0, 2).map((cert, i) => (
+                        <div key={i} className="mb-2 flex gap-2">
+                          <div className="text-[8px] text-gray-400 w-14 shrink-0">{cert.date}</div>
+                          <div><div className="text-[10px] font-bold">{cert.title}</div><div className="text-[9px] text-gray-500">{cert.issuer}</div></div>
                         </div>
                       ))}
                     </div>
