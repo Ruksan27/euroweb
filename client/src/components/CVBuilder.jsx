@@ -739,21 +739,18 @@ const CVBuilder = ({ initialData }) => {
                   </div>
                   <div className="flex-1 pl-2 pt-2">
                     <h2 className="text-xl font-bold text-gray-700 mb-1 tracking-tight">{cvData.personalInfo.fullName || 'YOUR NAME'}</h2>
-                    <div className="border-b-2 border-gray-600 mb-2"></div>
+                    <div className="border-b border-gray-300 mb-2"></div>
                     <div className="text-[9px] text-gray-800 leading-relaxed">
                       {[
                         cvData.personalInfo.passportNumber ? <span key="1"><strong>Passport:</strong> {cvData.personalInfo.passportNumber}</span> : null,
                         cvData.personalInfo.dateOfBirth ? <span key="2"><strong>Date of birth:</strong> {cvData.personalInfo.dateOfBirth}</span> : null,
                         cvData.personalInfo.nationality ? <span key="3"><strong>Nationality:</strong> {cvData.personalInfo.nationality}</span> : null,
-                      ].filter(Boolean).map((el, i, arr) => <span key={'top'+i}>{el}{i < arr.length - 1 ? ' | ' : ''}</span>)}
-                      <br/>
-                      {[
                         cvData.personalInfo.phone ? <span key="4"><strong>Phone number:</strong> {cvData.personalInfo.phone}</span> : null,
                         cvData.personalInfo.email ? <span key="5"><strong>Email address:</strong> <span className="text-blue-700 underline">{cvData.personalInfo.email}</span></span> : null,
                         cvData.personalInfo.website ? <span key="6"><strong>Website:</strong> <span className="text-blue-700 underline">{cvData.personalInfo.website}</span></span> : null,
-                      ].filter(Boolean).map((el, i, arr) => <span key={'mid'+i}>{el}{i < arr.length - 1 ? ' | ' : ''}</span>)}
+                      ].filter(Boolean).map((el, i, arr) => <span key={'top'+i}>{el}{i < arr.length - 1 ? ' | ' : ''}</span>)}
                       <br/>
-                      {(cvData.personalInfo.address || cvData.personalInfo.city) && <span><strong>Address:</strong> {[cvData.personalInfo.address, cvData.personalInfo.city, cvData.personalInfo.country].filter(Boolean).join(', ')}</span>}
+                      {(cvData.personalInfo.address || cvData.personalInfo.city) && <span><strong>Address:</strong> {[cvData.personalInfo.address, cvData.personalInfo.city, cvData.personalInfo.postalCode, cvData.personalInfo.country].filter(Boolean).join(', ')}</span>}
                     </div>
                   </div>
                 </div>
@@ -781,9 +778,11 @@ const CVBuilder = ({ initialData }) => {
                       <div className="border-b border-gray-400 mb-2"></div>
                       {cvData.workExperience.slice(0, 2).map((exp, i) => (
                         <div key={i} className="mb-3">
-                          <div className="text-[9px] uppercase"><strong>{exp.occupation}</strong> <span className="text-gray-500">– {exp.from} – {exp.to || 'Current'}</span></div>
-                          <div className="border-b border-gray-200 my-1"></div>
-                          <div className="text-[9px] text-gray-700">{exp.employer}{exp.city ? ', ' + exp.city : ''}</div>
+                          <div className="text-[9px] uppercase"><strong>{(exp.occupation || '').toUpperCase()}</strong> <span className="text-gray-500">– {exp.from} – {exp.to || 'Current'}{exp.country ? ' – ' + exp.country.toUpperCase() : ''}</span></div>
+                          <div className="border-b border-gray-200 w-[45%] my-1"></div>
+                          {exp.responsibilities && exp.responsibilities.filter(Boolean).map((resp, idx) => (
+                            <div key={idx} className="text-[9px] text-gray-700 leading-normal">{resp}</div>
+                          ))}
                         </div>
                       ))}
                     </div>

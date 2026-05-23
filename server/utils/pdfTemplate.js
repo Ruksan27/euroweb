@@ -52,24 +52,24 @@ const generateHTML = (data) => {
       .ep-left-col { width: 150px; flex-shrink: 0; text-align: right; padding-right: 18px; position: relative; }
       .ep-right-col { flex: 1; min-width: 0; padding-left: 10px; }
       
-      .ep-dot { width: 10px; height: 10px; background-color: #a9a9a9; border-radius: 50%; position: absolute; right: -5px; top: 4px; }
+      .ep-dot { width: 10px; height: 10px; background-color: #9ca3af; border-radius: 50%; position: absolute; right: -5px; top: 4px; }
       
-      .photo-wrap img { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid ${themeColor}; }
-      .photo-wrap .no-photo { width: 130px; height: 130px; border-radius: 50%; background: #eee; color: #888; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 3px solid ${themeColor}; }
+      .photo-wrap img { width: 130px; height: 130px; border-radius: ${photoRadius}; object-fit: cover; border: 3px solid ${themeColor}; }
+      .photo-wrap .no-photo { width: 130px; height: 130px; border-radius: ${photoRadius}; background: #eee; color: #888; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 3px solid ${themeColor}; }
       
-      .ep-name { font-size: ${titleFontSize}; font-weight: 700; color: #555; margin: 0 0 6px 0; }
-      .ep-name-line { border-bottom: 2px solid #555; margin-bottom: 12px; }
+      .ep-name { font-size: ${titleFontSize}; font-weight: 700; color: #374151; margin: 0 0 6px 0; }
+      .ep-name-line { border-bottom: 1.5px solid #d1d5db; margin-bottom: 12px; }
       .ep-contact-info { font-size: ${baseFontSize}; color: #000; line-height: 1.8; }
       
       .ep-section-title { font-size: ${sectionTitleSize}; font-weight: 800; text-transform: uppercase; color: #000; margin-bottom: 2px; }
-      .ep-section-line { border-bottom: 1px solid #777; margin-bottom: 12px; }
+      .ep-section-line { border-bottom: 1px solid #bdc3c7; margin-bottom: 12px; }
       
       .ep-text { font-size: ${baseFontSize}; color: #222; line-height: 1.5; }
       
-      .ep-item-head { font-size: ${baseFontSize}; margin-bottom: 6px; }
-      .ep-item-head strong { text-transform: uppercase; color: #333; }
-      .ep-item-date { color: #777; }
-      .ep-item-line { border-bottom: 1px solid #ddd; margin-bottom: 6px; }
+      .ep-item-head { font-size: ${baseFontSize}; margin-bottom: 4px; }
+      .ep-item-head strong { text-transform: uppercase; color: #111827; }
+      .ep-item-date { color: #4b5563; font-weight: 400; }
+      .ep-item-line { border-bottom: 1.5px solid #e5e7eb; margin: 4px 0 8px 0; width: 45%; }
       
       .ep-lang-table { width: 100%; border-collapse: collapse; font-size: ${baseFontSize}; text-align: center; margin-top: 10px; }
       .ep-lang-table th { font-weight: 700; padding: 6px 4px; border-bottom: 1px solid #ddd; }
@@ -87,10 +87,10 @@ const generateHTML = (data) => {
       ${p.passportNumber ? `<strong>Passport:</strong> ${p.passportNumber} &nbsp;|&nbsp; ` : ''}
       ${p.dateOfBirth ? `<strong>Date of birth:</strong> ${p.dateOfBirth} &nbsp;|&nbsp; ` : ''}
       ${p.nationality ? `<strong>Nationality:</strong> ${p.nationality} &nbsp;|&nbsp; ` : ''}
-      ${p.phone ? `<strong>Phone number:</strong> ${p.phone}<br/>` : ''}
+      ${p.phone ? `<strong>Phone number:</strong> ${p.phone} &nbsp;|&nbsp; ` : ''}
       ${p.email ? `<strong>Email address:</strong> <a href="mailto:${p.email}" style="color: #0055a6; text-decoration: underline;">${p.email}</a> &nbsp;|&nbsp; ` : ''}
-      ${p.website ? `<strong>Website:</strong> <a href="${p.website.startsWith('http') ? p.website : 'https://' + p.website}" style="color: #0055a6; text-decoration: underline;" target="_blank">${p.website}</a><br/>` : ''}
-      ${p.address || p.city ? `<strong>Address:</strong> ${p.address ? p.address + ', ' : ''}${p.city || ''}${p.country ? ' (' + p.country + ')' : ''}` : ''}
+      ${p.website ? `<strong>Website:</strong> <a href="${p.website.startsWith('http') ? p.website : 'https://' + p.website}" style="color: #0055a6; text-decoration: underline;" target="_blank">${p.website}</a>` : ''}
+      ${p.address || p.city ? `<br/><strong>Address:</strong> ${[p.address, p.city, p.postalCode, p.country].filter(Boolean).join(', ')}` : ''}
     `;
 
     // Implement variants mainly changing header alignment/colors if needed. But user requested EXACT layout.
@@ -132,15 +132,12 @@ const generateHTML = (data) => {
             ${data.workExperience.map(exp => `
               <div style="margin-bottom: 16px;">
                 <div class="ep-item-head">
-                  <strong>${exp.occupation || ''}</strong> <span class="ep-item-date">– ${exp.from || ''} – ${exp.to || 'Current'}${exp.country ? ' – ' + exp.country : ''}</span>
+                  <strong>${(exp.occupation || '').toUpperCase()}</strong> <span class="ep-item-date">– ${exp.from || ''} – ${exp.to || 'Current'}${exp.country ? ' – ' + exp.country.toUpperCase() : ''}</span>
                 </div>
                 <div class="ep-item-line"></div>
-                <div class="ep-text" style="color: #555;">
-                  ${exp.employer || ''}${exp.city ? ', ' + exp.city : ''}
-                </div>
                 ${exp.responsibilities?.length > 0 ? `
-                  <div class="ep-text" style="margin-top: 6px;">
-                    ${exp.responsibilities.join('<br/>')}
+                  <div class="ep-text" style="margin-top: 4px; line-height: 1.6;">
+                    ${exp.responsibilities.filter(Boolean).join('<br/>')}
                   </div>
                 ` : ''}
               </div>
