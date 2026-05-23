@@ -80,6 +80,10 @@ const CVSchema = new mongoose.Schema({
   folderName: String,  // Cloudinary folder: e.g. "john_doe_2024"
   cvFormat: { type: String, default: 'europass' }, // 'europass' | 'modern' | 'minimal'
   themeColor: { type: String, default: '#0e4a8e' },
+  europassVariant: { type: String, default: 'v1' },
+  textSize: { type: String, default: 'medium' },
+  europassLogo: { type: String, default: 'first_page' },
+  pageNumbers: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
 });
 

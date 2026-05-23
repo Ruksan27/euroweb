@@ -146,11 +146,18 @@ router.get('/generate-pdf/:id', async (req, res) => {
     const page = await browser.newPage();
     await page.setContent(generateHTML(cv), { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForNetworkIdle({ idleTime: 500, timeout: 15000 }).catch(() => {});
-    const pdfBuffer = await page.pdf({
+    const pageNumbers = cv.pageNumbers !== false;
+    const pdfOptions = {
       format: 'A4', printBackground: true,
-      margin: { top: '0', right: '0', bottom: '0', left: '0' },
+      margin: { top: '0', right: '0', bottom: pageNumbers ? '30px' : '0', left: '0' },
       timeout: 60000
-    });
+    };
+    if (pageNumbers) {
+      pdfOptions.displayHeaderFooter = true;
+      pdfOptions.headerTemplate = '<div></div>';
+      pdfOptions.footerTemplate = `<div style="font-size: 8px; width: 100%; text-align: center; color: #888; font-family: sans-serif;">Page <span class="pageNumber"></span> / <span class="totalPages"></span></div>`;
+    }
+    const pdfBuffer = await page.pdf(pdfOptions);
     await browser.close();
 
     const name = (cv.personalInfo?.fullName || 'CV').replace(/\s+/g, '_');
@@ -214,7 +221,7 @@ router.get('/generate-docx/:id', async (req, res) => {
     const fileBuffer = await HTMLtoDOCX(htmlString, null, {
       table: { row: { cantSplit: true } },
       footer: true,
-      pageNumber: true,
+      pageNumber: cv.pageNumbers !== false,
     });
 
     const name = (cv.personalInfo?.fullName || 'CV').replace(/\s+/g, '_');
