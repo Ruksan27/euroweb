@@ -756,7 +756,10 @@ const CVBuilder = ({ initialData }) => {
                   {/* Logo Right */}
                   <div className="w-[140px] shrink-0 text-right">
                     {cvData.europassLogo !== 'no' && (
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/0/06/Europass_-_European_Union_-_Logo.svg" className="h-[50px] ml-auto" alt="Europass" />
+                      <div className="flex items-center justify-end gap-2">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Flag_of_Europe.svg" className="h-[28px]" alt="EU Flag" />
+                        <span className="text-[#663399] font-sans text-[24px] font-semibold tracking-tighter lowercase leading-none">europass</span>
+                      </div>
                     )}
                   </div>
                 </div>
