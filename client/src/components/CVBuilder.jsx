@@ -12,6 +12,8 @@ const CVBuilder = ({ initialData }) => {
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [lastSavedId, setLastSavedId] = useState(initialData?._id || null);
+  const [aboutSuggestions, setAboutSuggestions] = useState([]);
+  const [loadingAbout, setLoadingAbout] = useState(false);
 
   const [cvData, setCvData] = useState(() => {
     const defaultData = {
@@ -154,6 +156,26 @@ const CVBuilder = ({ initialData }) => {
     } finally {
       setLoading(false);
       e.target.value = null; // reset file input
+    }
+  };
+
+  const handleSuggestAboutMe = async () => {
+    try {
+      setLoadingAbout(true);
+      const response = await axios.post(`${API.ai}/suggest-about`, {
+        skills: [...(cvData.digitalSkills || []), ...(cvData.otherSkills || [])],
+        experience: cvData.workExperience || [],
+        currentAboutMe: cvData.personalInfo.aboutMe || ''
+      });
+      if (response.data && response.data.options) {
+        setAboutSuggestions(response.data.options);
+      } else {
+        toast.error('Failed to get suggestions');
+      }
+    } catch (error) {
+      toast.error('Error generating suggestions');
+    } finally {
+      setLoadingAbout(false);
     }
   };
 
@@ -441,7 +463,38 @@ const CVBuilder = ({ initialData }) => {
               <input placeholder="Website URL" className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2 focus:border-indigo-500 outline-none" value={cvData.personalInfo.website || ''} onChange={(e) => updatePI('website', e.target.value)} />
               <input placeholder="LinkedIn Profile Link" className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2 focus:border-indigo-500 outline-none" value={cvData.personalInfo.linkedIn || ''} onChange={(e) => updatePI('linkedIn', e.target.value)} />
 
-              <textarea placeholder="About Me / Profile Description" className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:border-indigo-500 outline-none sm:col-span-2 min-h-[100px]" value={cvData.personalInfo.aboutMe || ''} onChange={(e) => updatePI('aboutMe', e.target.value)} />
+              <div className="sm:col-span-2 relative">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-sm text-slate-300 font-medium">About Me / Profile Description</label>
+                  <button 
+                    type="button"
+                    onClick={handleSuggestAboutMe} 
+                    disabled={loadingAbout}
+                    className="flex items-center gap-1 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                  >
+                    {loadingAbout ? <LucideLoader2 size={14} className="animate-spin" /> : <LucideSparkles size={14} />}
+                    AI Suggest
+                  </button>
+                </div>
+                <textarea placeholder="Write a short summary..." className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:border-indigo-500 outline-none min-h-[100px]" value={cvData.personalInfo.aboutMe || ''} onChange={(e) => updatePI('aboutMe', e.target.value)} />
+                
+                {aboutSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 w-full z-10 mt-2 bg-slate-800 border border-indigo-500/30 rounded-xl p-3 shadow-2xl space-y-3">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs text-indigo-300 font-bold uppercase tracking-wider">AI Suggestions</span>
+                      <button onClick={() => setAboutSuggestions([])} className="text-slate-400 hover:text-white text-xs">Close</button>
+                    </div>
+                    {aboutSuggestions.map((sug, idx) => (
+                      <div key={idx} 
+                        onClick={() => { updatePI('aboutMe', sug); setAboutSuggestions([]); }}
+                        className="p-3 bg-white/5 hover:bg-indigo-500/20 rounded-lg cursor-pointer text-sm text-slate-300 transition-colors"
+                      >
+                        {sug}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 
@@ -724,45 +777,61 @@ const CVBuilder = ({ initialData }) => {
           {/* Rich Mini Preview Box */}
           <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
             {cvData.cvFormat === 'europass' ? (
-              <div className="p-8 font-sans relative bg-white" style={{ color: '#222', minHeight: '800px', transform: `scale(${cvData.textSize === 'small' ? 0.9 : cvData.textSize === 'large' ? 1.1 : 1})`, transformOrigin: 'top center' }}>
-                {/* Header Section */}
-                <div className="flex justify-between items-start mb-8">
-                  {/* Photo Left */}
-                  <div className="w-[130px] shrink-0 text-left">
-                    <div className={`w-[110px] h-[110px] border-[2px] flex items-center justify-center overflow-hidden ${getPhotoShapeClass(cvData.photoShape)}`} style={{ borderColor: cvData.themeColor || '#0e4a8e' }}>
-                      {cvData.photoUrl ? <img src={cvData.photoUrl} className="w-full h-full object-cover" /> : <LucideUser size={26} className="text-gray-400" />}
-                    </div>
-                  </div>
+              <div className="font-sans relative bg-white" style={{ color: '#222', minHeight: '800px', transform: `scale(${cvData.textSize === 'small' ? 0.9 : cvData.textSize === 'large' ? 1.1 : 1})`, transformOrigin: 'top center' }}>
+                
+                {/* Header Section (Gray Background) */}
+                <div className={`bg-[#f3f4f6] px-8 pt-8 pb-6 ${cvData.europassVariant === 'v3' ? 'text-center' : ''}`}>
                   
-                  {/* Center Name & Meta */}
-                  <div className="flex-1 px-2">
-                    <h1 className="text-[24px] font-bold uppercase tracking-wide mb-3" style={{ color: cvData.themeColor || '#222' }}>{cvData.personalInfo.fullName || 'YOUR NAME'}</h1>
-                    <div className="text-[10px] text-gray-800 leading-tight border-t border-gray-300 pt-2 mb-1">
-                      {[
-                        cvData.personalInfo.passportNumber ? <span key="1"><strong>Passport:</strong> {cvData.personalInfo.passportNumber}</span> : null,
-                        cvData.personalInfo.dateOfBirth ? <span key="2"><strong>Date of birth:</strong> {cvData.personalInfo.dateOfBirth}</span> : null,
-                        cvData.personalInfo.nationality ? <span key="3"><strong>Nationality:</strong> {cvData.personalInfo.nationality}</span> : null,
-                        cvData.personalInfo.gender ? <span key="4"><strong>Gender:</strong> {cvData.personalInfo.gender}</span> : null,
-                      ].filter(Boolean).map((el, i, arr) => <span key={'top'+i}>{el}{i < arr.length - 1 ? ' | ' : ''}</span>)}
+                  {/* Logo - Always Top Right unless centered */}
+                  {cvData.europassLogo !== 'no' && (
+                    <div className={`flex items-center gap-2 mb-4 ${cvData.europassVariant === 'v3' ? 'justify-center' : 'justify-end'}`}>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" className="h-[28px] mr-1">
+                        <rect width="120" height="80" fill="#034ea2"/>
+                        <circle cx="60" cy="15" r="3" fill="#ffcc00"/><circle cx="60" cy="65" r="3" fill="#ffcc00"/>
+                        <circle cx="35" cy="40" r="3" fill="#ffcc00"/><circle cx="85" cy="40" r="3" fill="#ffcc00"/>
+                        <circle cx="42" cy="22" r="3" fill="#ffcc00"/><circle cx="78" cy="58" r="3" fill="#ffcc00"/>
+                        <circle cx="78" cy="22" r="3" fill="#ffcc00"/><circle cx="42" cy="58" r="3" fill="#ffcc00"/>
+                        <circle cx="37" cy="30" r="3" fill="#ffcc00"/><circle cx="83" cy="50" r="3" fill="#ffcc00"/>
+                        <circle cx="83" cy="30" r="3" fill="#ffcc00"/><circle cx="37" cy="50" r="3" fill="#ffcc00"/>
+                      </svg>
+                      <span className="text-[#5c2d91] font-sans text-[24px] tracking-tighter lowercase leading-none">europass</span>
                     </div>
-                    <div className="text-[10px] text-gray-800 leading-tight">
-                      {[
-                        cvData.personalInfo.email ? <span key="5"><strong>Email address:</strong> <span className="text-blue-600 underline">{cvData.personalInfo.email}</span></span> : null,
-                        (cvData.personalInfo.address || cvData.personalInfo.city) ? <span key="6"><strong>Address:</strong> {[cvData.personalInfo.address, cvData.personalInfo.postalCode, cvData.personalInfo.city, cvData.personalInfo.country].filter(Boolean).join(', ')} (Home)</span> : null,
-                      ].filter(Boolean).map((el, i, arr) => <span key={'bot'+i}>{el}{i < arr.length - 1 ? ' | ' : ''}</span>)}
-                    </div>
-                  </div>
+                  )}
 
-                  {/* Logo Right */}
-                  <div className="w-[140px] shrink-0 text-right">
-                    {cvData.europassLogo !== 'no' && (
-                      <div className="flex items-center justify-end gap-2">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Flag_of_Europe.svg" className="h-[28px]" alt="EU Flag" />
-                        <span className="text-[#663399] font-sans text-[24px] font-semibold tracking-tighter lowercase leading-none">europass</span>
+                  {/* Header Content based on variant */}
+                  <div className={`flex ${cvData.europassVariant === 'v2' ? 'flex-row-reverse' : cvData.europassVariant === 'v3' || cvData.europassVariant === 'v4' ? 'flex-col items-center' : 'flex-row'}`}>
+                    
+                    {/* Photo */}
+                    {cvData.europassVariant !== 'v4' && (
+                      <div className={`shrink-0 ${cvData.europassVariant === 'v3' ? 'mb-4' : cvData.europassVariant === 'v2' ? 'pl-4' : 'pr-4 w-[140px] text-right'}`}>
+                        <div className={`w-[120px] h-[120px] mx-auto border-[3px] border-gray-200 flex items-center justify-center overflow-hidden rounded-full`}>
+                          {cvData.photoUrl ? <img src={cvData.photoUrl} className="w-full h-full object-cover" /> : <LucideUser size={26} className="text-gray-400" />}
+                        </div>
                       </div>
                     )}
+                    
+                    {/* Details */}
+                    <div className={`flex-1 ${cvData.europassVariant === 'v2' ? 'text-right' : cvData.europassVariant === 'v3' || cvData.europassVariant === 'v4' ? 'text-center' : 'pl-2 text-left'}`}>
+                      <h1 className="text-[26px] font-bold uppercase tracking-wide mb-2" style={{ color: '#4b5563' }}>{cvData.personalInfo.fullName || 'YOUR NAME'}</h1>
+                      <div className={`border-b border-gray-400 mb-3 ${cvData.europassVariant === 'v2' ? 'ml-auto' : cvData.europassVariant === 'v3' || cvData.europassVariant === 'v4' ? 'mx-auto w-1/2' : ''}`}></div>
+                      
+                      <div className="text-[10px] text-gray-900 leading-tight font-semibold">
+                        {[
+                          cvData.personalInfo.passportNumber ? <span key="1"><strong className="text-black">Residence permit:</strong> {cvData.personalInfo.passportNumber}</span> : null,
+                          cvData.personalInfo.dateOfBirth ? <span key="2"><strong className="text-black">Date of birth:</strong> {cvData.personalInfo.dateOfBirth}</span> : null,
+                          cvData.personalInfo.nationality ? <span key="3"><strong className="text-black">Nationality:</strong> {cvData.personalInfo.nationality}</span> : null,
+                          cvData.personalInfo.phone ? <span key="4"><strong className="text-black">Phone number:</strong> {cvData.personalInfo.phone} (Home)</span> : null,
+                          cvData.personalInfo.email ? <span key="5"><strong className="text-black">Email address:</strong> <span className="text-blue-600 underline font-normal">{cvData.personalInfo.email}</span></span> : null,
+                          (cvData.personalInfo.address || cvData.personalInfo.city) ? <span key="6"><br/><strong className="text-black">Address:</strong> {[cvData.personalInfo.address, cvData.personalInfo.postalCode, cvData.personalInfo.city, cvData.personalInfo.country].filter(Boolean).join(', ')} (Home)</span> : null,
+                        ].filter(Boolean).map((el, i, arr) => <span key={'info'+i}>{el}{i < arr.length - 1 && el.key !== "6" ? ' | ' : ''}</span>)}
+                      </div>
+                    </div>
+
                   </div>
                 </div>
+
+                {/* Body Section (White Background) */}
+                <div className="bg-white px-8 pt-6 pb-8">
 
                 {/* ABOUT ME */}
                 {cvData.personalInfo.aboutMe && (

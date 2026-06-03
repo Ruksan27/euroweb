@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { extractDataFromDocument } = require('../controllers/aiController');
+const { extractDataFromDocument, suggestAboutMe } = require('../controllers/aiController');
 
 // Using Local Storage for Testing
 const upload = multer({ dest: 'uploads/' });
@@ -19,5 +19,7 @@ router.post('/extract', (req, res, next) => {
     next();
   });
 }, extractDataFromDocument);
+
+router.post('/suggest-about', express.json(), suggestAboutMe);
 
 module.exports = router;

@@ -132,6 +132,7 @@ router.get('/generate-pdf/:id', async (req, res) => {
     const browser = await puppeteer.launch({
       executablePath: getExecutablePath(),
       headless: true,
+      env: { ...process.env, DBUS_SESSION_BUS_ADDRESS: '/dev/null' },
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -141,16 +142,19 @@ router.get('/generate-pdf/:id', async (req, res) => {
         '--no-zygote',
         '--single-process'
       ],
-      dumpio: true
+      dumpio: false // disable dumpio to hide chromium internal logs like dbus
     });
     const page = await browser.newPage();
-    await page.setContent(generateHTML(cv), { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForNetworkIdle({ idleTime: 500, timeout: 15000 }).catch(() => {});
+    await page.setContent(generateHTML(cv), { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Wait for the root element to ensure DOM is fully rendered before capture
+    await page.waitForSelector('#cv-root', { timeout: 10000 }).catch(() => {
+      console.warn('PDF: #cv-root selector not found within timeout, proceeding anyway');
+    });
     const pageNumbers = cv.pageNumbers !== false;
     const pdfOptions = {
       format: 'A4', printBackground: true,
       margin: { top: '0', right: '0', bottom: pageNumbers ? '30px' : '0', left: '0' },
-      timeout: 60000
+      timeout: 30000
     };
     if (pageNumbers) {
       pdfOptions.displayHeaderFooter = true;
@@ -181,6 +185,7 @@ router.get('/generate-jpg/:id', async (req, res) => {
     const browser = await puppeteer.launch({
       executablePath: getExecutablePath(),
       headless: true,
+      env: { ...process.env, DBUS_SESSION_BUS_ADDRESS: '/dev/null' },
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -190,12 +195,14 @@ router.get('/generate-jpg/:id', async (req, res) => {
         '--no-zygote',
         '--single-process'
       ],
-      dumpio: true
+      dumpio: false
     });
     const page = await browser.newPage();
-    // Use networkidle2 and increase timeout to prevent hanging on external images
-    await page.setContent(generateHTML(cv), { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForNetworkIdle({ idleTime: 500, timeout: 15000 }).catch(() => {});
+    await page.setContent(generateHTML(cv), { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Wait for the root element to ensure DOM is fully rendered before capture
+    await page.waitForSelector('#cv-root', { timeout: 10000 }).catch(() => {
+      console.warn('JPG: #cv-root selector not found within timeout, proceeding anyway');
+    });
     const imgBuffer = await page.screenshot({ type: 'jpeg', quality: 95, fullPage: true });
     await browser.close();
 

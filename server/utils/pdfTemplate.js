@@ -47,64 +47,107 @@ const generateHTML = (data) => {
     // -------------------------------------------------------------------------
     css = `
       .page { font-family: "Arial", sans-serif; }
-      .ep-container { padding: 40px 40px; }
+      .ep-header-bg { background-color: #f3f4f6; padding: 40px 40px 30px 40px; }
+      .ep-body-bg { background-color: #ffffff; padding: 30px 40px 40px 40px; }
+      
       .ep-row { display: flex; width: 100%; margin-bottom: 20px; position: relative; }
-      .ep-left-col { width: 150px; flex-shrink: 0; text-align: right; padding-right: 18px; position: relative; }
+      .ep-left-col { width: 160px; flex-shrink: 0; text-align: right; padding-right: 20px; position: relative; }
       .ep-right-col { flex: 1; min-width: 0; padding-left: 10px; }
       
       .ep-dot { width: 10px; height: 10px; background-color: #9ca3af; border-radius: 50%; position: absolute; right: -5px; top: 4px; }
       
-      .photo-wrap img { width: 130px; height: 130px; border-radius: ${photoRadius}; object-fit: cover; border: 3px solid ${themeColor}; }
-      .photo-wrap .no-photo { width: 130px; height: 130px; border-radius: ${photoRadius}; background: #eee; color: #888; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 3px solid ${themeColor}; }
+      .photo-wrap img { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 3px solid #e5e7eb; }
+      .photo-wrap .no-photo { width: 140px; height: 140px; border-radius: 50%; background: #e5e7eb; color: #888; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 3px solid #e5e7eb; }
       
-      .ep-name { font-size: ${titleFontSize}; font-weight: 700; color: #374151; margin: 0 0 6px 0; }
-      .ep-name-line { border-bottom: 1.5px solid #d1d5db; margin-bottom: 12px; }
-      .ep-contact-info { font-size: ${baseFontSize}; color: #000; line-height: 1.8; }
+      .ep-name { font-size: ${titleFontSize}; font-weight: 700; color: #4b5563; margin: 0 0 6px 0; }
+      .ep-name-line { border-bottom: 1px solid #9ca3af; margin-bottom: 12px; }
+      .ep-contact-info { font-size: ${baseFontSize}; color: #111827; line-height: 1.8; font-weight: 600; }
+      .ep-contact-info a { color: #2563eb; font-weight: 400; text-decoration: underline; }
+      .ep-contact-info strong { color: #000; font-weight: 700; }
       
       .ep-section-title { font-size: ${sectionTitleSize}; font-weight: 800; text-transform: uppercase; color: #000; margin-bottom: 2px; }
-      .ep-section-line { border-bottom: 1px solid #bdc3c7; margin-bottom: 12px; }
+      .ep-section-line { border-bottom: 1px solid #9ca3af; margin-bottom: 12px; }
       
-      .ep-text { font-size: ${baseFontSize}; color: #222; line-height: 1.5; }
+      .ep-text { font-size: ${baseFontSize}; color: #374151; line-height: 1.5; }
       
       .ep-item-head { font-size: ${baseFontSize}; margin-bottom: 4px; }
-      .ep-item-head strong { text-transform: uppercase; color: #111827; }
-      .ep-item-date { color: #4b5563; font-weight: 400; }
-      .ep-item-line { border-bottom: 1.5px solid #e5e7eb; margin: 4px 0 8px 0; width: 45%; }
+      .ep-item-head strong { text-transform: uppercase; color: #4b5563; font-weight: 700; }
+      .ep-item-date { color: #6b7280; font-weight: 400; }
+      .ep-item-line { border-bottom: 1px solid #d1d5db; margin: 4px 0 8px 0; width: 50%; }
       
       .ep-lang-table { width: 100%; border-collapse: collapse; font-size: ${baseFontSize}; text-align: center; margin-top: 10px; }
-      .ep-lang-table th { font-weight: 700; padding: 6px 4px; border-bottom: 1px solid #ddd; }
-      .ep-lang-table td { padding: 6px 4px; background: #f9f9f9; border-bottom: 1px solid #fff; }
-      .ep-lang-table td:first-child { font-weight: 700; text-align: left; background: #f1f1f1; }
+      .ep-lang-table th { font-weight: 700; padding: 6px 4px; border-bottom: 1px solid #e5e7eb; }
+      .ep-lang-table td { padding: 6px 4px; background: #f9fafb; border-bottom: 1px solid #fff; }
+      .ep-lang-table td:first-child { font-weight: 700; text-align: left; background: #f3f4f6; }
       .ep-lang-subhead th { font-weight: 400; font-size: calc(${baseFontSize} - 1px); border-bottom: none; }
-      
-      .skills-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
-      .skill-tag { background: #f1f3f9; color: #34495e; padding: 4px 10px; border-radius: 6px; font-size: ${metaFontSize}; font-weight: 500; border: 1px solid #e2e8f0; margin-right: 6px; margin-bottom: 6px; display: inline-block; }
     `;
 
-    const logoHtml = europassLogo !== 'no' ? `<div style="text-align: right; margin-bottom: 10px;"><img src="https://upload.wikimedia.org/wikipedia/commons/0/06/Europass_-_European_Union_-_Logo.svg" alt="Europass Logo" style="height: 40px; width: auto;" /></div>` : '';
+    const logoHtml = europassLogo !== 'no' ? `
+      <div style="text-align: right; margin-bottom: 20px; display: flex; justify-content: flex-end; align-items: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" style="height: 35px; margin-right: 8px;">
+          <rect width="120" height="80" fill="#034ea2"/>
+          <!-- Simplified stars approximation for SVG footprint -->
+          <circle cx="60" cy="15" r="3" fill="#ffcc00"/><circle cx="60" cy="65" r="3" fill="#ffcc00"/>
+          <circle cx="35" cy="40" r="3" fill="#ffcc00"/><circle cx="85" cy="40" r="3" fill="#ffcc00"/>
+          <circle cx="42" cy="22" r="3" fill="#ffcc00"/><circle cx="78" cy="58" r="3" fill="#ffcc00"/>
+          <circle cx="78" cy="22" r="3" fill="#ffcc00"/><circle cx="42" cy="58" r="3" fill="#ffcc00"/>
+          <circle cx="37" cy="30" r="3" fill="#ffcc00"/><circle cx="83" cy="50" r="3" fill="#ffcc00"/>
+          <circle cx="83" cy="30" r="3" fill="#ffcc00"/><circle cx="37" cy="50" r="3" fill="#ffcc00"/>
+        </svg>
+        <span style="font-size: 32px; font-weight: 400; color: #5c2d91; font-family: 'Arial', sans-serif; letter-spacing: -1px;">europass</span>
+      </div>
+    ` : '';
 
     const contactsHtml = `
-      ${p.passportNumber ? `<strong>Passport:</strong> ${p.passportNumber} &nbsp;|&nbsp; ` : ''}
+      ${p.passportNumber ? `<strong>Residence permit:</strong> ${p.passportNumber} &nbsp;|&nbsp; ` : ''}
       ${p.dateOfBirth ? `<strong>Date of birth:</strong> ${p.dateOfBirth} &nbsp;|&nbsp; ` : ''}
       ${p.nationality ? `<strong>Nationality:</strong> ${p.nationality} &nbsp;|&nbsp; ` : ''}
-      ${p.phone ? `<strong>Phone number:</strong> ${p.phone} &nbsp;|&nbsp; ` : ''}
-      ${p.email ? `<strong>Email address:</strong> <a href="mailto:${p.email}" style="color: #0055a6; text-decoration: underline;">${p.email}</a> &nbsp;|&nbsp; ` : ''}
-      ${p.website ? `<strong>Website:</strong> <a href="${p.website.startsWith('http') ? p.website : 'https://' + p.website}" style="color: #0055a6; text-decoration: underline;" target="_blank">${p.website}</a>` : ''}
-      ${p.address || p.city ? `<br/><strong>Address:</strong> ${[p.address, p.city, p.postalCode, p.country].filter(Boolean).join(', ')}` : ''}
+      ${p.phone ? `<strong>Phone number:</strong> ${p.phone} (Home) &nbsp;|&nbsp; ` : ''}
+      ${p.email ? `<strong>Email address:</strong> <a href="mailto:${p.email}">${p.email}</a> &nbsp;|&nbsp; ` : ''}
+      ${p.website ? `<strong>Website:</strong> <a href="${p.website.startsWith('http') ? p.website : 'https://' + p.website}" target="_blank">${p.website}</a>` : ''}
+      ${p.address || p.city ? `<br/><strong>Address:</strong> ${[p.address, p.city, p.postalCode, p.country].filter(Boolean).join(', ')} (Home)` : ''}
     `;
 
-    // Implement variants mainly changing header alignment/colors if needed. But user requested EXACT layout.
-    // So we use the same layout for all, maybe tweaking colors.
-    
-    bodyContent = `
-      <div class="ep-container">
-        ${logoHtml}
-        
-        <div class="ep-row" style="margin-bottom: 30px;">
-          <div class="ep-left-col">
+    // Implement variants changing header alignment
+    let headerHtml = '';
+
+    if (europassVariant === 'v2') {
+      headerHtml = `
+        <div class="ep-header-bg">
+          ${logoHtml}
+          <div class="ep-row" style="display: flex; flex-direction: row-reverse;">
+            <div class="ep-left-col" style="text-align: left; padding-left: 20px; padding-right: 0;">
+              ${renderPhoto('photo-wrap')}
+            </div>
+            <div class="ep-right-col" style="text-align: right; padding-right: 20px;">
+              <h1 class="ep-name" style="text-align: right;">${p.fullName || 'YOUR NAME'}</h1>
+              <div class="ep-name-line" style="margin-left: auto;"></div>
+              <div class="ep-contact-info" style="text-align: right;">
+                ${contactsHtml.replace(/<br\/>/g, ' ')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (europassVariant === 'v3') {
+      headerHtml = `
+        <div class="ep-header-bg" style="text-align: center;">
+          ${logoHtml.replace('justify-content: flex-end', 'justify-content: center')}
+          <div style="display: flex; justify-content: center; margin-bottom: 15px;">
             ${renderPhoto('photo-wrap')}
           </div>
-          <div class="ep-right-col">
+          <h1 class="ep-name" style="text-align: center;">${p.fullName || 'YOUR NAME'}</h1>
+          <div class="ep-name-line" style="width: 50%; margin: 0 auto 12px auto;"></div>
+          <div class="ep-contact-info" style="text-align: center;">
+            ${contactsHtml}
+          </div>
+        </div>
+      `;
+    } else if (europassVariant === 'v4') {
+      headerHtml = `
+        <div class="ep-header-bg">
+          ${logoHtml}
+          <div>
             <h1 class="ep-name">${p.fullName || 'YOUR NAME'}</h1>
             <div class="ep-name-line"></div>
             <div class="ep-contact-info">
@@ -112,6 +155,32 @@ const generateHTML = (data) => {
             </div>
           </div>
         </div>
+      `;
+    } else {
+      // Default (Layout 1)
+      headerHtml = `
+        <div class="ep-header-bg">
+          ${logoHtml}
+          <div class="ep-row" style="margin-bottom: 0;">
+            <div class="ep-left-col">
+              ${renderPhoto('photo-wrap')}
+            </div>
+            <div class="ep-right-col">
+              <h1 class="ep-name">${p.fullName || 'YOUR NAME'}</h1>
+              <div class="ep-name-line"></div>
+              <div class="ep-contact-info">
+                ${contactsHtml}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    bodyContent = `
+      ${headerHtml}
+      
+      <div class="ep-body-bg">
         
         ${p.aboutMe ? `
         <div class="ep-row">
@@ -749,7 +818,7 @@ const generateHTML = (data) => {
       </style>
     </head>
     <body>
-      <div class="page">
+      <div class="page" id="cv-root">
         ${bodyContent}
       </div>
     </body>

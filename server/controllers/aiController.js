@@ -263,4 +263,61 @@ const extractDataFromDocument = async (req, res) => {
   }
 };
 
-module.exports = { extractDataFromDocument };
+const suggestAboutMe = async (req, res) => {
+  try {
+    const { skills, experience, currentAboutMe } = req.body;
+    
+    const prompt = `
+      You are an expert CV and resume writer. The user has extracted details from their uploaded documents and wants to generate a highly professional "About Me" (Profile Summary) section.
+      
+      Here are the extracted details from their CV/documents:
+      Skills: ${skills ? skills.join(', ') : 'Not provided'}
+      Experience: ${experience ? JSON.stringify(experience) : 'Not provided'}
+      Current About Me: ${currentAboutMe || 'None'}
+      
+      Please thoroughly analyze these details and write exactly 3 distinct, highly readable, and professional summaries (3-4 sentences each) designed to impress recruiters. 
+      Make them distinct in tone (e.g., one action-oriented, one experienced professional, one passionate/objective-focused). Make sure the grammar is perfect and the format is easy for others to read.
+      ONLY return a valid JSON object containing an "options" array with the 3 strings. Do not return markdown blocks.
+      Example format: {"options": ["Option 1 text", "Option 2 text", "Option 3 text"]}
+    `;
+
+    console.log("[AI] Requesting 'About Me' suggestions from Groq...");
+    const completion = await groq.chat.completions.create({
+      messages: [{ role: 'user', content: prompt }],
+      model: "llama-3.3-70b-versatile",
+      response_format: { type: 'json_object' } // We want a JSON array, but Groq requires a JSON object if we use json_object type, so let's adjust prompt
+    });
+
+    let responseText = completion.choices[0].message.content;
+    
+    // Fallback if the JSON parsing fails (e.g. if the LLM didn't return an object despite instructions)
+    let options = [];
+    try {
+      responseText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+      const result = JSON.parse(responseText);
+      if (Array.isArray(result)) {
+        options = result;
+      } else if (result.options && Array.isArray(result.options)) {
+        options = result.options;
+      } else {
+        // Just extract string values if it's a weird object
+        options = Object.values(result).filter(val => typeof val === 'string');
+      }
+    } catch (e) {
+      console.log("Failed to parse Groq response, falling back to Gemini or regex");
+      // Could use Gemini here, but for now just send an error or empty
+      throw new Error("Failed to parse AI response into options.");
+    }
+    
+    if (options.length === 0) {
+      options = ["A dedicated professional with a strong background.", "An experienced specialist seeking new opportunities.", "A hardworking individual with great skills."];
+    }
+
+    res.json({ options: options.slice(0, 3) });
+  } catch (error) {
+    console.error("AI SUGGESTION ERROR:", error);
+    res.status(500).json({ error: "Failed to generate suggestions" });
+  }
+};
+
+module.exports = { extractDataFromDocument, suggestAboutMe };
