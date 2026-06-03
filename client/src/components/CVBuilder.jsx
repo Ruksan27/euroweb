@@ -779,8 +779,8 @@ const CVBuilder = ({ initialData }) => {
             {cvData.cvFormat === 'europass' ? (
               <div className="font-sans relative bg-white" style={{ color: '#222', minHeight: '800px', transform: `scale(${cvData.textSize === 'small' ? 0.9 : cvData.textSize === 'large' ? 1.1 : 1})`, transformOrigin: 'top center' }}>
                 
-                {/* Header Section (Gray Background) */}
-                <div className={`bg-[#f3f4f6] px-8 pt-8 pb-6 ${cvData.europassVariant === 'v3' ? 'text-center' : ''}`}>
+                {/* Header Section */}
+                <div className={`bg-white px-8 pt-8 pb-3 ${cvData.europassVariant === 'v3' ? 'text-center' : ''}`}>
                   
                   {/* Logo - Always Top Right unless centered */}
                   {cvData.europassLogo !== 'no' && (
@@ -831,7 +831,7 @@ const CVBuilder = ({ initialData }) => {
                 </div>
 
                 {/* Body Section (White Background) */}
-                <div className="bg-white px-8 pt-6 pb-8">
+                <div className="bg-white px-8 pt-3 pb-8">
 
                 {/* ABOUT ME */}
                 {cvData.personalInfo.aboutMe && (

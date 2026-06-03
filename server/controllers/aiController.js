@@ -290,7 +290,6 @@ const suggestAboutMe = async (req, res) => {
 
     let responseText = completion.choices[0].message.content;
     
-    // Fallback if the JSON parsing fails (e.g. if the LLM didn't return an object despite instructions)
     let options = [];
     try {
       responseText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
@@ -300,13 +299,22 @@ const suggestAboutMe = async (req, res) => {
       } else if (result.options && Array.isArray(result.options)) {
         options = result.options;
       } else {
-        // Just extract string values if it's a weird object
         options = Object.values(result).filter(val => typeof val === 'string');
       }
     } catch (e) {
-      console.log("Failed to parse Groq response, falling back to Gemini or regex");
-      // Could use Gemini here, but for now just send an error or empty
-      throw new Error("Failed to parse AI response into options.");
+      console.log("Failed to parse Groq response, falling back to Gemini");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const chatCompletion = await model.generateContent(prompt);
+      responseText = chatCompletion.response.text();
+      responseText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+      const result = JSON.parse(responseText);
+      if (Array.isArray(result)) {
+        options = result;
+      } else if (result.options && Array.isArray(result.options)) {
+        options = result.options;
+      } else {
+        options = Object.values(result).filter(val => typeof val === 'string');
+      }
     }
     
     if (options.length === 0) {

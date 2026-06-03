@@ -46,9 +46,9 @@ const generateHTML = (data) => {
     // EUROPASS CLASSIC TEMPLATE
     // -------------------------------------------------------------------------
     css = `
-      .page { font-family: "Arial", sans-serif; }
-      .ep-header-bg { background-color: #f3f4f6; padding: 40px 40px 30px 40px; }
-      .ep-body-bg { background-color: #ffffff; padding: 30px 40px 40px 40px; }
+      .page { font-family: "Arial", sans-serif; background-color: #ffffff; }
+      .ep-header-bg { background-color: #ffffff; padding: 40px 40px 10px 40px; }
+      .ep-body-bg { background-color: #ffffff; padding: 20px 40px 40px 40px; }
       
       .ep-row { display: flex; width: 100%; margin-bottom: 20px; position: relative; }
       .ep-left-col { width: 160px; flex-shrink: 0; text-align: right; padding-right: 20px; position: relative; }
@@ -59,7 +59,7 @@ const generateHTML = (data) => {
       .photo-wrap img { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 3px solid #e5e7eb; }
       .photo-wrap .no-photo { width: 140px; height: 140px; border-radius: 50%; background: #e5e7eb; color: #888; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 3px solid #e5e7eb; }
       
-      .ep-name { font-size: ${titleFontSize}; font-weight: 700; color: #4b5563; margin: 0 0 6px 0; }
+      .ep-name { font-size: ${titleFontSize}; font-weight: 700; color: #4b5563; margin: 0 0 6px 0; text-transform: uppercase; }
       .ep-name-line { border-bottom: 1px solid #9ca3af; margin-bottom: 12px; }
       .ep-contact-info { font-size: ${baseFontSize}; color: #111827; line-height: 1.8; font-weight: 600; }
       .ep-contact-info a { color: #2563eb; font-weight: 400; text-decoration: underline; }

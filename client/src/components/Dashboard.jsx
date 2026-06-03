@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
   LucideFileText, LucideEye, LucideTrash, LucideExternalLink, LucideDownload,
-  LucideUsers, LucideSearch, LucideLoader2, LucideCalendar, LucideBriefcase
+  LucideUsers, LucideSearch, LucideLoader2, LucideCalendar, LucideBriefcase, LucideEdit
 } from 'lucide-react';
 import { API } from '../config/api';
 import { toast } from 'react-hot-toast';
 import UserManagement from './UserManagement';
 import CVModal from './CVModal';
 
-const Dashboard = ({ onLogout }) => {
+const Dashboard = ({ onLogout, onEditCV }) => {
   const [cvs, setCvs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('my-cvs'); // 'my-cvs' | 'users' | 'all-cvs'
@@ -277,6 +277,13 @@ const Dashboard = ({ onLogout }) => {
                               <LucideEye size={15} />
                             </button>
                             <button
+                              onClick={() => onEditCV && onEditCV(cv)}
+                              className="p-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition"
+                              title="Edit CV"
+                            >
+                              <LucideEdit size={15} />
+                            </button>
+                            <button
                               onClick={() => handleDownload(cv._id)}
                               className="p-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition"
                               title="Download PDF"
@@ -356,12 +363,20 @@ const Dashboard = ({ onLogout }) => {
                     <span className="text-xs text-slate-500">
                       {new Date(cv.createdAt).toLocaleDateString()}
                     </span>
-                    <button 
-                      onClick={() => handleDownload(cv._id)}
-                      className="flex items-center gap-1 text-primary-400 hover:text-primary-300 font-medium text-sm transition-transform hover:scale-105 active:scale-95"
-                    >
-                      <LucideDownload size={16} /> Download PDF
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => onEditCV && onEditCV(cv)}
+                        className="flex items-center gap-1 text-blue-400 hover:text-blue-300 font-medium text-sm transition-transform hover:scale-105 active:scale-95"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={() => handleDownload(cv._id)}
+                        className="flex items-center gap-1 text-primary-400 hover:text-primary-300 font-medium text-sm transition-transform hover:scale-105 active:scale-95"
+                      >
+                        <LucideDownload size={16} /> Download
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

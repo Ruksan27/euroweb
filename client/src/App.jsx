@@ -105,6 +105,7 @@ function App() {
         ) : (
           <Dashboard 
             onLogout={handleLogoutAll} 
+            onEditCV={(cv) => { setEditingCV(cv); setView('builder'); }}
           />
         )}
       </div>
