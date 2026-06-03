@@ -982,6 +982,7 @@ const CVBuilder = ({ initialData }) => {
                     </div>
                   </div>
                 )}
+                </div>
 
                 {/* Page Number */}
                 {cvData.pageNumbers !== false && (
