@@ -51,35 +51,22 @@ const generateHTML = (data) => {
       .ep-body-bg { background-color: #ffffff; padding: 20px 40px 40px 40px; }
       
       .ep-row { display: flex; width: 100%; margin-bottom: 20px; position: relative; }
-      .ep-left-col { width: 160px; flex-shrink: 0; text-align: right; padding-right: 20px; position: relative; }
-      .ep-right-col { flex: 1; min-width: 0; padding-left: 10px; }
+      .ep-left-col { width: 20px; flex-shrink: 0; display: flex; justify-content: flex-start; padding-top: 6px; }
+      .ep-right-col { flex: 1; min-width: 0; }
       
-      .ep-dot { width: 10px; height: 10px; background-color: #9ca3af; border-radius: 50%; position: absolute; right: -5px; top: 4px; }
+      .ep-dot { width: 6px; height: 6px; background-color: #9ca3af; border-radius: 50%; }
       
-      .photo-wrap img { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 3px solid #e5e7eb; }
-      .photo-wrap .no-photo { width: 140px; height: 140px; border-radius: 50%; background: #e5e7eb; color: #888; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 3px solid #e5e7eb; }
+      .photo-wrap img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #e5e7eb; margin-left: auto; }
+      .photo-wrap .no-photo { width: 120px; height: 120px; border-radius: 50%; background: #e5e7eb; color: #888; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 3px solid #e5e7eb; margin-left: auto; }
       
-      .ep-name { font-size: ${titleFontSize}; font-weight: 700; color: #4b5563; margin: 0 0 6px 0; text-transform: uppercase; }
+      .ep-name { font-size: ${titleFontSize}; font-weight: 700; color: #4b5563; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 1px; }
       .ep-name-line { border-bottom: 1px solid #9ca3af; margin-bottom: 12px; }
-      .ep-contact-info { font-size: ${baseFontSize}; color: #111827; line-height: 1.8; font-weight: 600; }
+      .ep-contact-info { font-size: 10px; color: #111827; line-height: 1.5; font-weight: 600; }
       .ep-contact-info a { color: #2563eb; font-weight: 400; text-decoration: underline; }
       .ep-contact-info strong { color: #000; font-weight: 700; }
       
-      .ep-section-title { font-size: ${sectionTitleSize}; font-weight: 800; text-transform: uppercase; color: #000; margin-bottom: 2px; }
+      .ep-section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #000; margin-bottom: 4px; letter-spacing: 1px; }
       .ep-section-line { border-bottom: 1px solid #9ca3af; margin-bottom: 12px; }
-      
-      .ep-text { font-size: ${baseFontSize}; color: #374151; line-height: 1.5; }
-      
-      .ep-item-head { font-size: ${baseFontSize}; margin-bottom: 4px; }
-      .ep-item-head strong { text-transform: uppercase; color: #4b5563; font-weight: 700; }
-      .ep-item-date { color: #6b7280; font-weight: 400; }
-      .ep-item-line { border-bottom: 1px solid #d1d5db; margin: 4px 0 8px 0; width: 50%; }
-      
-      .ep-lang-table { width: 100%; border-collapse: collapse; font-size: ${baseFontSize}; text-align: center; margin-top: 10px; }
-      .ep-lang-table th { font-weight: 700; padding: 6px 4px; border-bottom: 1px solid #e5e7eb; }
-      .ep-lang-table td { padding: 6px 4px; background: #f9fafb; border-bottom: 1px solid #fff; }
-      .ep-lang-table td:first-child { font-weight: 700; text-align: left; background: #f3f4f6; }
-      .ep-lang-subhead th { font-weight: 400; font-size: calc(${baseFontSize} - 1px); border-bottom: none; }
     `;
 
     const logoHtml = europassLogo !== 'no' ? `
@@ -115,11 +102,11 @@ const generateHTML = (data) => {
       headerHtml = `
         <div class="ep-header-bg">
           ${logoHtml}
-          <div class="ep-row" style="display: flex; flex-direction: row-reverse;">
-            <div class="ep-left-col" style="text-align: left; padding-left: 20px; padding-right: 0;">
+          <div class="ep-row" style="display: flex; flex-direction: row-reverse; margin-bottom: 0;">
+            <div style="width: 140px; text-align: left; padding-left: 16px;">
               ${renderPhoto('photo-wrap')}
             </div>
-            <div class="ep-right-col" style="text-align: right; padding-right: 20px;">
+            <div class="ep-right-col" style="text-align: right; padding-right: 16px;">
               <h1 class="ep-name" style="text-align: right;">${p.fullName || 'YOUR NAME'}</h1>
               <div class="ep-name-line" style="margin-left: auto;"></div>
               <div class="ep-contact-info" style="text-align: right;">
@@ -145,11 +132,11 @@ const generateHTML = (data) => {
       `;
     } else if (europassVariant === 'v4') {
       headerHtml = `
-        <div class="ep-header-bg">
-          ${logoHtml}
+        <div class="ep-header-bg" style="text-align: center;">
+          ${logoHtml.replace('justify-content: flex-end', 'justify-content: center')}
           <div>
             <h1 class="ep-name">${p.fullName || 'YOUR NAME'}</h1>
-            <div class="ep-name-line"></div>
+            <div class="ep-name-line" style="width: 50%; margin: 0 auto 12px auto;"></div>
             <div class="ep-contact-info">
               ${contactsHtml}
             </div>
@@ -162,14 +149,14 @@ const generateHTML = (data) => {
         <div class="ep-header-bg">
           ${logoHtml}
           <div class="ep-row" style="margin-bottom: 0;">
-            <div class="ep-left-col">
+            <div style="width: 140px; text-align: right; padding-right: 16px; flex-shrink: 0;">
               ${renderPhoto('photo-wrap')}
             </div>
-            <div class="ep-right-col">
+            <div class="ep-right-col" style="padding-left: 8px;">
               <h1 class="ep-name">${p.fullName || 'YOUR NAME'}</h1>
               <div class="ep-name-line"></div>
               <div class="ep-contact-info">
-                ${contactsHtml}
+                ${contactsHtml.replace(/<br\/>/g, ' ')}
               </div>
             </div>
           </div>
@@ -186,82 +173,9 @@ const generateHTML = (data) => {
         <div class="ep-row">
           <div class="ep-left-col"><div class="ep-dot"></div></div>
           <div class="ep-right-col">
-            <div class="ep-section-title">ABOUT ME</div>
+            <div class="ep-section-title">About Me</div>
             <div class="ep-section-line"></div>
-            <div class="ep-text">${p.aboutMe}</div>
-          </div>
-        </div>` : ''}
-
-        ${(data.workExperience && data.workExperience.length > 0) ? `
-        <div class="ep-row">
-          <div class="ep-left-col"><div class="ep-dot"></div></div>
-          <div class="ep-right-col">
-            <div class="ep-section-title">WORK EXPERIENCE</div>
-            <div class="ep-section-line"></div>
-            ${data.workExperience.map(exp => `
-              <div style="margin-bottom: 16px;">
-                <div class="ep-item-head">
-                  <strong>${(exp.occupation || '').toUpperCase()}</strong> <span class="ep-item-date">– ${exp.from || ''} – ${exp.to || 'Current'}${exp.country ? ' – ' + exp.country.toUpperCase() : ''}</span>
-                </div>
-                <div class="ep-item-line"></div>
-                ${exp.responsibilities?.length > 0 ? `
-                  <div class="ep-text" style="margin-top: 4px; line-height: 1.6;">
-                    ${exp.responsibilities.filter(Boolean).join('<br/>')}
-                  </div>
-                ` : ''}
-              </div>
-            `).join('')}
-          </div>
-        </div>` : ''}
-
-        ${(p.motherTongue || (data.languages && data.languages.length > 0)) ? `
-        <div class="ep-row">
-          <div class="ep-left-col"><div class="ep-dot"></div></div>
-          <div class="ep-right-col">
-            <div class="ep-section-title">LANGUAGE SKILLS</div>
-            <div class="ep-section-line"></div>
-            
-            ${p.motherTongue ? `
-            <div class="ep-text" style="margin-bottom: 10px;">
-              Mother tongue(s): <strong>${p.motherTongue}</strong>
-            </div>` : ''}
-            
-            ${(data.languages && data.languages.length > 0) ? `
-            <div class="ep-text" style="margin-bottom: 10px;">Other language(s):</div>
-            <table class="ep-lang-table">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th colspan="2">UNDERSTANDING</th>
-                  <th colspan="2">SPEAKING</th>
-                  <th>WRITING</th>
-                </tr>
-                <tr class="ep-lang-subhead">
-                  <th></th>
-                  <th>Listening</th>
-                  <th>Reading</th>
-                  <th>Spoken production</th>
-                  <th>Spoken interaction</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                ${data.languages.map(lang => `
-                  <tr>
-                    <td>${lang.language || ''}</td>
-                    <td>${lang.listening || ''}</td>
-                    <td>${lang.reading || ''}</td>
-                    <td>${lang.spokenProduction || ''}</td>
-                    <td>${lang.spokenInteraction || ''}</td>
-                    <td>${lang.writing || ''}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-            <div style="font-size: calc(${metaFontSize} - 1px); color: #777; font-style: italic; margin-top: 6px;">
-              Levels: A1 and A2: Basic user; B1 and B2: Independent user; C1 and C2: Proficient user
-            </div>
-            ` : ''}
+            <div style="font-size: 10px; color: #1f2937; line-height: 1.6; text-align: justify;">${p.aboutMe}</div>
           </div>
         </div>` : ''}
 
@@ -269,21 +183,37 @@ const generateHTML = (data) => {
         <div class="ep-row">
           <div class="ep-left-col"><div class="ep-dot"></div></div>
           <div class="ep-right-col">
-            <div class="ep-section-title">EDUCATION AND TRAINING</div>
+            <div class="ep-section-title">Education and Training</div>
             <div class="ep-section-line"></div>
             ${data.education.map(edu => `
               <div style="margin-bottom: 16px;">
-                <div class="ep-item-head">
-                  <strong>${edu.qualification || ''}</strong>
+                <div style="font-size: 9px; color: #6b7280; margin-bottom: 2px;">${edu.from} - ${edu.to || ''} ${edu.city}${edu.country ? ', ' + edu.country : ''}</div>
+                <div style="font-size: 10px; margin-bottom: 2px;"><strong>${(edu.qualification || '').toUpperCase()}</strong> <span style="color: #374151; text-transform: capitalize;">${edu.organization}</span></div>
+                <div style="border-bottom: 1px solid #e5e7eb; width: 100%; margin-bottom: 6px;"></div>
+                <div style="font-size: 9px; color: #1f2937;">
+                  <strong>Field of study</strong> ${edu.fieldOfStudy || 'General'} <span style="margin: 0 4px; color: #9ca3af;">|</span> <strong>Level in EQF</strong> ${edu.eqfLevel || 'N/A'}
                 </div>
-                <div class="ep-item-line"></div>
-                <div class="ep-text" style="margin-bottom: 4px;">
-                  ${edu.organization || ''}
-                </div>
-                <div class="ep-text" style="font-size: ${metaFontSize};">
-                  ${edu.fieldOfStudy ? `<strong>Field of study:</strong> ${edu.fieldOfStudy} <br/>` : ''}
-                  ${edu.eqfLevel ? `<strong>Level in EQF:</strong> ${edu.eqfLevel}` : ''}
-                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>` : ''}
+
+        ${(data.workExperience && data.workExperience.length > 0) ? `
+        <div class="ep-row">
+          <div class="ep-left-col"><div class="ep-dot"></div></div>
+          <div class="ep-right-col">
+            <div class="ep-section-title">Work Experience</div>
+            <div class="ep-section-line"></div>
+            ${data.workExperience.map(exp => `
+              <div style="margin-bottom: 16px;">
+                <div style="font-size: 9px; color: #6b7280; margin-bottom: 2px;">${exp.from} – ${exp.to || 'Current'} ${exp.city}${exp.country ? ', ' + exp.country : ''}</div>
+                <div style="font-size: 10px; margin-bottom: 2px;"><strong>${(exp.occupation || '').toUpperCase()}</strong> <span style="color: #374151; text-transform: capitalize;">${exp.employer}</span></div>
+                <div style="border-bottom: 1px solid #e5e7eb; width: 100%; margin-bottom: 6px;"></div>
+                ${exp.responsibilities?.length > 0 ? `
+                  <ul style="font-size: 9px; color: #1f2937; padding-left: 12px; margin-top: 4px; list-style-type: disc;">
+                    ${exp.responsibilities.filter(Boolean).map(resp => `<li style="margin-bottom: 2px;">${resp}</li>`).join('')}
+                  </ul>
+                ` : ''}
               </div>
             `).join('')}
           </div>
@@ -293,38 +223,74 @@ const generateHTML = (data) => {
         <div class="ep-row">
           <div class="ep-left-col"><div class="ep-dot"></div></div>
           <div class="ep-right-col">
-            <div class="ep-section-title">CERTIFICATIONS</div>
+            <div class="ep-section-title">Certifications</div>
             <div class="ep-section-line"></div>
             ${data.certificates.map(cert => `
               <div style="margin-bottom: 16px;">
-                <div class="ep-text" style="color: #777; font-size: ${metaFontSize};">
-                  ${cert.issuer || ''}${cert.date ? ', ' + cert.date : ''}
-                </div>
-                <div class="ep-item-head">
-                  <strong>${cert.title || ''}</strong>
-                </div>
+                <div style="font-size: 9px; color: #6b7280; margin-bottom: 2px;">${cert.issuer} ${cert.date ? '— ' + cert.date : ''}</div>
+                <div style="font-size: 10px; margin-bottom: 6px;"><strong>${cert.title}</strong></div>
+                <div style="font-size: 9px; color: #1f2937;"><strong>Mode of learning:</strong> Project based</div>
               </div>
             `).join('')}
           </div>
         </div>` : ''}
 
-        ${(data.digitalSkills && data.digitalSkills.length > 0) ? `
+        ${(p.motherTongue || (data.languages && data.languages.length > 0)) ? `
         <div class="ep-row">
           <div class="ep-left-col"><div class="ep-dot"></div></div>
           <div class="ep-right-col">
-            <div class="ep-section-title">DIGITAL SKILLS</div>
+            <div class="ep-section-title">Language Skills</div>
             <div class="ep-section-line"></div>
-            <div class="ep-text">${data.digitalSkills.join(', ')}</div>
+            
+            ${p.motherTongue ? `
+            <div style="font-size: 10px; margin-bottom: 12px;">
+              Mother tongue(s): <strong style="text-transform: uppercase; margin-left: 8px;">${p.motherTongue}</strong>
+            </div>` : ''}
+            
+            ${(data.languages && data.languages.length > 0) ? `
+            <div style="margin-bottom: 8px;">
+              <div style="font-size: 10px; margin-bottom: 8px;">Other language(s):</div>
+              <div style="width: 100%; font-size: 9px; text-align: center;">
+                <div style="display: flex; font-weight: bold; margin-bottom: 4px;">
+                  <div style="width: 20%;"></div>
+                  <div style="width: 30%; text-transform: uppercase;">Understanding</div>
+                  <div style="width: 30%; text-transform: uppercase;">Speaking</div>
+                  <div style="width: 20%; text-transform: uppercase;">Writing</div>
+                </div>
+                <div style="display: flex; font-size: 8px; color: #1f2937; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; padding: 4px 0;">
+                  <div style="width: 20%;"></div>
+                  <div style="width: 15%;">Listening</div>
+                  <div style="width: 15%;">Reading</div>
+                  <div style="width: 15%;">Spoken production</div>
+                  <div style="width: 15%;">Spoken interaction</div>
+                  <div style="width: 20%;"></div>
+                </div>
+                ${data.languages.map(l => `
+                  <div style="display: flex; border-bottom: 1px solid #e5e7eb; padding: 6px 0;">
+                    <div style="width: 20%; font-weight: 800; text-align: left; padding-left: 8px; text-transform: uppercase;">${l.language}</div>
+                    <div style="width: 15%;">${l.listening || '-'}</div>
+                    <div style="width: 15%;">${l.reading || '-'}</div>
+                    <div style="width: 15%;">${l.spokenProduction || '-'}</div>
+                    <div style="width: 15%;">${l.spokenInteraction || '-'}</div>
+                    <div style="width: 20%;">${l.writing || '-'}</div>
+                  </div>
+                `).join('')}
+              </div>
+              <div style="font-size: 8px; color: #6b7280; font-style: italic; margin-top: 8px;">Levels: A1 and A2: Basic user; B1 and B2: Independent user; C1 and C2: Proficient user</div>
+            </div>
+            ` : ''}
           </div>
         </div>` : ''}
-        
-        ${(data.otherSkills && data.otherSkills.length > 0) ? `
+
+        ${(data.digitalSkills?.length > 0 || data.otherSkills?.length > 0) ? `
         <div class="ep-row">
           <div class="ep-left-col"><div class="ep-dot"></div></div>
           <div class="ep-right-col">
-            <div class="ep-section-title">OTHER SKILLS</div>
+            <div class="ep-section-title">Skills</div>
             <div class="ep-section-line"></div>
-            <div class="ep-text">${data.otherSkills.join(', ')}</div>
+            <div style="font-size: 10px; color: #1f2937; line-height: 1.6;">
+              ${[...(data.digitalSkills || []), ...(data.otherSkills || [])].join(' | ')}
+            </div>
           </div>
         </div>` : ''}
       </div>
