@@ -1,6 +1,6 @@
 const generateHTML = (data) => {
   const p = data.personalInfo || {};
-  const photoShape = data.photoShape || 'rounded';
+  const photoShape = data.photoShape || 'circle';
   const format = data.cvFormat || 'europass';
   const themeColor = data.themeColor || '#0e4a8e';
   const photoRadius = photoShape === 'circle' ? '50%' : photoShape === 'square' ? '0' : '12px';
@@ -51,8 +51,8 @@ const generateHTML = (data) => {
       .ep-body-bg { background-color: #ffffff; padding: 20px 40px 40px 40px; }
       
       .ep-row { display: flex; width: 100%; margin-bottom: 20px; position: relative; }
-      .ep-left-col { width: 20px; flex-shrink: 0; display: flex; justify-content: flex-start; padding-top: 6px; }
-      .ep-right-col { flex: 1; min-width: 0; }
+      .ep-left-col { width: 140px; flex-shrink: 0; display: flex; justify-content: flex-end; padding-right: 20px; padding-top: 6px; box-sizing: border-box; }
+      .ep-right-col { flex: 1; min-width: 0; padding-left: 8px; box-sizing: border-box; }
       
       .ep-dot { width: 6px; height: 6px; background-color: #9ca3af; border-radius: 50%; }
       
@@ -149,7 +149,7 @@ const generateHTML = (data) => {
         <div class="ep-header-bg">
           ${logoHtml}
           <div class="ep-row" style="margin-bottom: 0;">
-            <div style="width: 140px; text-align: right; padding-right: 16px; flex-shrink: 0;">
+            <div style="width: 140px; text-align: right; padding-right: 20px; flex-shrink: 0; box-sizing: border-box;">
               ${renderPhoto('photo-wrap')}
             </div>
             <div class="ep-right-col" style="padding-left: 8px;">
