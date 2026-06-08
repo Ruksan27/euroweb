@@ -144,7 +144,7 @@ const CVBuilder = ({ initialData }) => {
     try {
       const response = await axios.post(`${API.ai}/extract`, formData);
       const aiData = response.data;
-      
+
       setCvData(prev => ({
         ...prev,
         [section]: [...(prev[section] || []), ...(aiData[section] || [])],
@@ -379,7 +379,7 @@ const CVBuilder = ({ initialData }) => {
                 {cvData.cvFormat === 'europass' && (
                   <div className="mt-6 pt-4 border-t border-white/10 space-y-4">
                     <h4 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Europass Settings</h4>
-                    
+
                     <div>
                       <label className="text-xs text-slate-400 block mb-2">Template Variant</label>
                       <div className="grid grid-cols-2 gap-2">
@@ -496,9 +496,9 @@ const CVBuilder = ({ initialData }) => {
               <div className="sm:col-span-2 relative">
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm text-slate-300 font-medium">About Me / Profile Description</label>
-                  <button 
+                  <button
                     type="button"
-                    onClick={handleSuggestAboutMe} 
+                    onClick={handleSuggestAboutMe}
                     disabled={loadingAbout}
                     className="flex items-center gap-1 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
                   >
@@ -507,7 +507,7 @@ const CVBuilder = ({ initialData }) => {
                   </button>
                 </div>
                 <textarea placeholder="Write a short summary..." className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 focus:border-indigo-500 outline-none min-h-[100px]" value={cvData.personalInfo.aboutMe || ''} onChange={(e) => updatePI('aboutMe', e.target.value)} />
-                
+
                 {aboutSuggestions.length > 0 && (
                   <div className="absolute top-full left-0 w-full z-10 mt-2 bg-slate-800 border border-indigo-500/30 rounded-xl p-3 shadow-2xl space-y-3">
                     <div className="flex justify-between items-center mb-1">
@@ -515,7 +515,7 @@ const CVBuilder = ({ initialData }) => {
                       <button onClick={() => setAboutSuggestions([])} className="text-slate-400 hover:text-white text-xs">Close</button>
                     </div>
                     {aboutSuggestions.map((sug, idx) => (
-                      <div key={idx} 
+                      <div key={idx}
                         onClick={() => { updatePI('aboutMe', sug); setAboutSuggestions([]); }}
                         className="p-3 bg-white/5 hover:bg-indigo-500/20 rounded-lg cursor-pointer text-sm text-slate-300 transition-colors"
                       >
@@ -808,21 +808,21 @@ const CVBuilder = ({ initialData }) => {
           <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
             {cvData.cvFormat === 'europass' ? (
               <div className="font-sans relative bg-white" style={{ color: '#222', minHeight: '800px', transform: `scale(${cvData.textSize === 'small' ? 0.9 : cvData.textSize === 'large' ? 1.1 : 1})`, transformOrigin: 'top center' }}>
-                
+
                 {/* Header Section */}
                 <div className={`bg-white px-8 pt-8 pb-3 ${cvData.europassVariant === 'v3' ? 'text-center' : ''}`}>
-                  
+
                   {/* Logo - Always Top Right unless centered */}
                   {cvData.europassLogo !== 'no' && (
                     <div className={`flex items-center gap-2 mb-4 ${cvData.europassVariant === 'v3' ? 'justify-center' : 'justify-end'}`}>
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" className="h-[28px] mr-1">
-                        <rect width="120" height="80" fill="#034ea2"/>
-                        <circle cx="60" cy="15" r="3" fill="#ffcc00"/><circle cx="60" cy="65" r="3" fill="#ffcc00"/>
-                        <circle cx="35" cy="40" r="3" fill="#ffcc00"/><circle cx="85" cy="40" r="3" fill="#ffcc00"/>
-                        <circle cx="42" cy="22" r="3" fill="#ffcc00"/><circle cx="78" cy="58" r="3" fill="#ffcc00"/>
-                        <circle cx="78" cy="22" r="3" fill="#ffcc00"/><circle cx="42" cy="58" r="3" fill="#ffcc00"/>
-                        <circle cx="37" cy="30" r="3" fill="#ffcc00"/><circle cx="83" cy="50" r="3" fill="#ffcc00"/>
-                        <circle cx="83" cy="30" r="3" fill="#ffcc00"/><circle cx="37" cy="50" r="3" fill="#ffcc00"/>
+                        <rect width="120" height="80" fill="#034ea2" />
+                        <circle cx="60" cy="15" r="3" fill="#ffcc00" /><circle cx="60" cy="65" r="3" fill="#ffcc00" />
+                        <circle cx="35" cy="40" r="3" fill="#ffcc00" /><circle cx="85" cy="40" r="3" fill="#ffcc00" />
+                        <circle cx="42" cy="22" r="3" fill="#ffcc00" /><circle cx="78" cy="58" r="3" fill="#ffcc00" />
+                        <circle cx="78" cy="22" r="3" fill="#ffcc00" /><circle cx="42" cy="58" r="3" fill="#ffcc00" />
+                        <circle cx="37" cy="30" r="3" fill="#ffcc00" /><circle cx="83" cy="50" r="3" fill="#ffcc00" />
+                        <circle cx="83" cy="30" r="3" fill="#ffcc00" /><circle cx="37" cy="50" r="3" fill="#ffcc00" />
                       </svg>
                       <span className="text-[#5c2d91] font-sans text-[24px] tracking-tighter lowercase leading-none">europass</span>
                     </div>
@@ -830,7 +830,7 @@ const CVBuilder = ({ initialData }) => {
 
                   {/* Header Content based on variant */}
                   <div className={`flex ${cvData.europassVariant === 'v2' ? 'flex-row-reverse' : cvData.europassVariant === 'v3' || cvData.europassVariant === 'v4' ? 'flex-col items-center' : 'flex-row'}`}>
-                    
+
                     {/* Photo */}
                     {cvData.europassVariant !== 'v4' && (
                       <div className={`shrink-0 ${cvData.europassVariant === 'v3' ? 'mb-4' : cvData.europassVariant === 'v2' ? 'pl-4' : 'pr-4 w-[140px] text-right'}`}>
@@ -839,12 +839,12 @@ const CVBuilder = ({ initialData }) => {
                         </div>
                       </div>
                     )}
-                    
+
                     {/* Details */}
                     <div className={`flex-1 ${cvData.europassVariant === 'v2' ? 'text-right' : cvData.europassVariant === 'v3' || cvData.europassVariant === 'v4' ? 'text-center' : 'pl-2 text-left'}`}>
                       <h1 className="text-[26px] font-bold uppercase tracking-wide mb-2" style={{ color: '#4b5563' }}>{cvData.personalInfo.fullName || 'YOUR NAME'}</h1>
                       <div className={`border-b border-gray-400 mb-3 ${cvData.europassVariant === 'v2' ? 'ml-auto' : cvData.europassVariant === 'v3' || cvData.europassVariant === 'v4' ? 'mx-auto w-1/2' : ''}`}></div>
-                      
+
                       <div className="text-[10px] text-gray-900 leading-tight font-semibold">
                         {[
                           cvData.personalInfo.passportNumber ? <span key="1"><strong className="text-black">Residence permit:</strong> {cvData.personalInfo.passportNumber}</span> : null,
@@ -852,8 +852,8 @@ const CVBuilder = ({ initialData }) => {
                           cvData.personalInfo.nationality ? <span key="3"><strong className="text-black">Nationality:</strong> {cvData.personalInfo.nationality}</span> : null,
                           cvData.personalInfo.phone ? <span key="4"><strong className="text-black">Phone number:</strong> {cvData.personalInfo.phone} (Home)</span> : null,
                           cvData.personalInfo.email ? <span key="5"><strong className="text-black">Email address:</strong> <span className="text-blue-600 underline font-normal">{cvData.personalInfo.email}</span></span> : null,
-                          (cvData.personalInfo.address || cvData.personalInfo.city) ? <span key="6"><br/><strong className="text-black">Address:</strong> {[cvData.personalInfo.address, cvData.personalInfo.postalCode, cvData.personalInfo.city, cvData.personalInfo.country].filter(Boolean).join(', ')} (Home)</span> : null,
-                        ].filter(Boolean).map((el, i, arr) => <span key={'info'+i}>{el}{i < arr.length - 1 && el.key !== "6" ? ' | ' : ''}</span>)}
+                          (cvData.personalInfo.address || cvData.personalInfo.city) ? <span key="6"><br /><strong className="text-black">Address:</strong> {[cvData.personalInfo.address, cvData.personalInfo.postalCode, cvData.personalInfo.city, cvData.personalInfo.country].filter(Boolean).join(', ')} (Home)</span> : null,
+                        ].filter(Boolean).map((el, i, arr) => <span key={'info' + i}>{el}{i < arr.length - 1 && el.key !== "6" ? ' | ' : ''}</span>)}
                       </div>
                     </div>
 
@@ -863,155 +863,155 @@ const CVBuilder = ({ initialData }) => {
                 {/* Body Section (White Background) */}
                 <div className="bg-white px-8 pt-3 pb-8">
 
-                {/* ABOUT ME */}
-                {cvData.personalInfo.aboutMe && (
-                  <div className="flex mb-5 group">
-                    <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
-                      <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">About Me</h2>
-                      <div className="border-b border-gray-400 w-full mb-3"></div>
-                      <div className="text-[10px] text-gray-800 leading-relaxed text-justify">{cvData.personalInfo.aboutMe}</div>
-                    </div>
-                  </div>
-                )}
-
-                {/* EDUCATION */}
-                {cvData.education.length > 0 && (
-                  <div className="flex mb-5 group">
-                    <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
-                      <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Education and Training</h2>
-                      <div className="border-b border-gray-400 w-full mb-3"></div>
-                      {cvData.education.map((edu, i) => (
-                        <div key={i} className="mb-4">
-                          <div className="text-[9px] text-gray-500 mb-0.5">{edu.from} {edu.city}{edu.country ? ', ' + edu.country : ''}</div>
-                          <div className="text-[10px] uppercase mb-0.5"><strong>{edu.qualification}</strong> <span className="text-gray-700 capitalize">{edu.organization}</span></div>
-                          <div className="border-b border-gray-200 w-full mb-1.5"></div>
-                          <div className="text-[9px] text-gray-800">
-                            <strong>Field of study</strong> {edu.fieldOfStudy || 'General'} <span className="mx-1 text-gray-400">|</span> <strong>Level in EQF</strong> {edu.eqfLevel || 'N/A'}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* WORK EXPERIENCE */}
-                {cvData.workExperience.length > 0 && (
-                  <div className="flex mb-5 group">
-                    <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
-                      <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Work Experience</h2>
-                      <div className="border-b border-gray-400 w-full mb-3"></div>
-                      {cvData.workExperience.map((exp, i) => (
-                        <div key={i} className="mb-4">
-                          <div className="text-[9px] text-gray-500 mb-0.5">{exp.from} – {exp.to || 'Current'} {exp.city}{exp.country ? ', ' + exp.country : ''}</div>
-                          <div className="text-[10px] uppercase mb-0.5"><strong>{exp.occupation}</strong> <span className="text-gray-700 capitalize">{exp.employer}</span></div>
-                          <div className="border-b border-gray-200 w-full mb-1.5"></div>
-                          {exp.responsibilities && exp.responsibilities.filter(Boolean).length > 0 && (
-                            <ul className="text-[9px] text-gray-800 list-disc pl-3 mt-1">
-                              {exp.responsibilities.filter(Boolean).map((resp, idx) => <li key={idx}>{resp}</li>)}
-                            </ul>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* CERTIFICATIONS */}
-                {cvData.certificates.length > 0 && (
-                  <div className="flex mb-5 group">
-                    <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
-                      <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Certifications</h2>
-                      <div className="border-b border-gray-400 w-full mb-3"></div>
-                      {cvData.certificates.map((cert, i) => (
-                        <div key={i} className="mb-4">
-                          <div className="text-[9px] text-gray-500 mb-0.5">{cert.issuer} {cert.date ? '— ' + cert.date : ''}</div>
-                          <div className="text-[10px] mb-1.5"><strong>{cert.title}</strong></div>
-                          <div className="text-[9px] text-gray-800">
-                            <strong>Mode of learning:</strong> Project based
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* LANGUAGE SKILLS */}
-                {(cvData.personalInfo.motherTongue || cvData.languages.length > 0) && (
-                  <div className="flex mb-5 group">
-                    <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
-                      <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Language Skills</h2>
-                      <div className="border-b border-gray-400 w-full mb-3"></div>
-                      
-                      {cvData.personalInfo.motherTongue && (
-                        <div className="text-[10px] mb-3">Mother tongue(s): <strong className="uppercase ml-2">{cvData.personalInfo.motherTongue}</strong></div>
-                      )}
-                      
-                      {cvData.languages.length > 0 && (
-                        <div className="mb-2">
-                          <div className="text-[10px] mb-2">Other language(s):</div>
-                          <div className="w-full text-[9px] text-center">
-                            <div className="flex font-bold mb-1">
-                              <div className="w-[20%]"></div>
-                              <div className="w-[30%] uppercase">Understanding</div>
-                              <div className="w-[30%] uppercase">Speaking</div>
-                              <div className="w-[20%] uppercase">Writing</div>
-                            </div>
-                            <div className="flex text-[8px] text-gray-800 border-t border-b border-gray-200 py-1">
-                              <div className="w-[20%]"></div>
-                              <div className="w-[15%]">Listening</div>
-                              <div className="w-[15%]">Reading</div>
-                              <div className="w-[15%]">Spoken production</div>
-                              <div className="w-[15%]">Spoken interaction</div>
-                              <div className="w-[20%]"></div>
-                            </div>
-                            {cvData.languages.map((l, i) => (
-                              <div key={i} className="flex border-b border-gray-200 py-1.5">
-                                <div className="w-[20%] font-extrabold text-left pl-2 uppercase">{l.language}</div>
-                                <div className="w-[15%]">{l.listening || '-'}</div>
-                                <div className="w-[15%]">{l.reading || '-'}</div>
-                                <div className="w-[15%]">{l.spokenProduction || '-'}</div>
-                                <div className="w-[15%]">{l.spokenInteraction || '-'}</div>
-                                <div className="w-[20%]">{l.writing || '-'}</div>
-                              </div>
-                            ))}
-                          </div>
-                          <div className="text-[8px] text-gray-500 italic mt-2">Levels: A1 and A2: Basic user; B1 and B2: Independent user; C1 and C2: Proficient user</div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* SKILLS */}
-                {(cvData.digitalSkills.length > 0 || cvData.otherSkills.length > 0) && (
-                  <div className="flex mb-5 group">
-                    <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
-                      <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Skills</h2>
-                      <div className="border-b border-gray-400 w-full mb-3"></div>
-                      <div className="text-[10px] text-gray-800 leading-relaxed">
-                        {[...cvData.digitalSkills, ...cvData.otherSkills].join(' | ')}
+                  {/* ABOUT ME */}
+                  {cvData.personalInfo.aboutMe && (
+                    <div className="flex mb-5 group">
+                      <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
+                        <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
+                      </div>
+                      <div className="flex-1">
+                        <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">About Me</h2>
+                        <div className="border-b border-gray-400 w-full mb-3"></div>
+                        <div className="text-[10px] text-gray-800 leading-relaxed text-justify">{cvData.personalInfo.aboutMe}</div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {/* EDUCATION */}
+                  {cvData.education.length > 0 && (
+                    <div className="flex mb-5 group">
+                      <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
+                        <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
+                      </div>
+                      <div className="flex-1">
+                        <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Education and Training</h2>
+                        <div className="border-b border-gray-400 w-full mb-3"></div>
+                        {cvData.education.map((edu, i) => (
+                          <div key={i} className="mb-4">
+                            <div className="text-[9px] text-gray-500 mb-0.5">{edu.from} {edu.city}{edu.country ? ', ' + edu.country : ''}</div>
+                            <div className="text-[10px] uppercase mb-0.5"><strong>{edu.qualification}</strong> <span className="text-gray-700 capitalize">{edu.organization}</span></div>
+                            <div className="border-b border-gray-200 w-full mb-1.5"></div>
+                            <div className="text-[9px] text-gray-800">
+                              <strong>Field of study</strong> {edu.fieldOfStudy || 'General'} <span className="mx-1 text-gray-400">|</span> <strong>Level in EQF</strong> {edu.eqfLevel || 'N/A'}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* WORK EXPERIENCE */}
+                  {cvData.workExperience.length > 0 && (
+                    <div className="flex mb-5 group">
+                      <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
+                        <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
+                      </div>
+                      <div className="flex-1">
+                        <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Work Experience</h2>
+                        <div className="border-b border-gray-400 w-full mb-3"></div>
+                        {cvData.workExperience.map((exp, i) => (
+                          <div key={i} className="mb-4">
+                            <div className="text-[9px] text-gray-500 mb-0.5">{exp.from} – {exp.to || 'Current'} {exp.city}{exp.country ? ', ' + exp.country : ''}</div>
+                            <div className="text-[10px] uppercase mb-0.5"><strong>{exp.occupation}</strong> <span className="text-gray-700 capitalize">{exp.employer}</span></div>
+                            <div className="border-b border-gray-200 w-full mb-1.5"></div>
+                            {exp.responsibilities && exp.responsibilities.filter(Boolean).length > 0 && (
+                              <ul className="text-[9px] text-gray-800 list-disc pl-3 mt-1">
+                                {exp.responsibilities.filter(Boolean).map((resp, idx) => <li key={idx}>{resp}</li>)}
+                              </ul>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CERTIFICATIONS */}
+                  {cvData.certificates.length > 0 && (
+                    <div className="flex mb-5 group">
+                      <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
+                        <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
+                      </div>
+                      <div className="flex-1">
+                        <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Certifications</h2>
+                        <div className="border-b border-gray-400 w-full mb-3"></div>
+                        {cvData.certificates.map((cert, i) => (
+                          <div key={i} className="mb-4">
+                            <div className="text-[9px] text-gray-500 mb-0.5">{cert.issuer} {cert.date ? '— ' + cert.date : ''}</div>
+                            <div className="text-[10px] mb-1.5"><strong>{cert.title}</strong></div>
+                            <div className="text-[9px] text-gray-800">
+                              <strong>Mode of learning:</strong> Project based
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* LANGUAGE SKILLS */}
+                  {(cvData.personalInfo.motherTongue || cvData.languages.length > 0) && (
+                    <div className="flex mb-5 group">
+                      <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
+                        <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
+                      </div>
+                      <div className="flex-1">
+                        <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Language Skills</h2>
+                        <div className="border-b border-gray-400 w-full mb-3"></div>
+
+                        {cvData.personalInfo.motherTongue && (
+                          <div className="text-[10px] mb-3">Mother tongue(s): <strong className="uppercase ml-2">{cvData.personalInfo.motherTongue}</strong></div>
+                        )}
+
+                        {cvData.languages.length > 0 && (
+                          <div className="mb-2">
+                            <div className="text-[10px] mb-2">Other language(s):</div>
+                            <div className="w-full text-[9px] text-center">
+                              <div className="flex font-bold mb-1">
+                                <div className="w-[20%]"></div>
+                                <div className="w-[30%] uppercase">Understanding</div>
+                                <div className="w-[30%] uppercase">Speaking</div>
+                                <div className="w-[20%] uppercase">Writing</div>
+                              </div>
+                              <div className="flex text-[8px] text-gray-800 border-t border-b border-gray-200 py-1">
+                                <div className="w-[20%]"></div>
+                                <div className="w-[15%]">Listening</div>
+                                <div className="w-[15%]">Reading</div>
+                                <div className="w-[15%]">Spoken production</div>
+                                <div className="w-[15%]">Spoken interaction</div>
+                                <div className="w-[20%]"></div>
+                              </div>
+                              {cvData.languages.map((l, i) => (
+                                <div key={i} className="flex border-b border-gray-200 py-1.5">
+                                  <div className="w-[20%] font-extrabold text-left pl-2 uppercase">{l.language}</div>
+                                  <div className="w-[15%]">{l.listening || '-'}</div>
+                                  <div className="w-[15%]">{l.reading || '-'}</div>
+                                  <div className="w-[15%]">{l.spokenProduction || '-'}</div>
+                                  <div className="w-[15%]">{l.spokenInteraction || '-'}</div>
+                                  <div className="w-[20%]">{l.writing || '-'}</div>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="text-[8px] text-gray-500 italic mt-2">Levels: A1 and A2: Basic user; B1 and B2: Independent user; C1 and C2: Proficient user</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SKILLS */}
+                  {(cvData.digitalSkills.length > 0 || cvData.otherSkills.length > 0) && (
+                    <div className="flex mb-5 group">
+                      <div className="w-[20px] shrink-0 flex justify-start pt-[6px]">
+                        <div className="w-[6px] h-[6px] bg-gray-400 rounded-full"></div>
+                      </div>
+                      <div className="flex-1">
+                        <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Skills</h2>
+                        <div className="border-b border-gray-400 w-full mb-3"></div>
+                        <div className="text-[10px] text-gray-800 leading-relaxed">
+                          {[...cvData.digitalSkills, ...cvData.otherSkills].join(' | ')}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Page Number */}
@@ -1019,7 +1019,7 @@ const CVBuilder = ({ initialData }) => {
                   <div className="absolute bottom-4 right-6 text-[9px] text-gray-400">Page 1 / 1</div>
                 )}
               </div>
-) : cvData.cvFormat === 'modern' ? (
+            ) : cvData.cvFormat === 'modern' ? (
               /* ─── MODERN PREVIEW (dark sidebar) ─── */
               <div className="flex min-h-[400px]">
                 <div className="w-[35%] p-4 text-white" style={{ background: '#2c3e50' }}>
@@ -1041,31 +1041,31 @@ const CVBuilder = ({ initialData }) => {
                 <div className="w-[65%] p-4 bg-white text-gray-800">
                   {cvData.personalInfo.aboutMe && (
                     <><div className="text-[10px] font-bold text-[#2c3e50] uppercase border-b-2 border-[#ecf0f1] pb-1 mb-2">Profile</div>
-                    <p className="text-[8px] text-gray-500 italic mb-3 line-clamp-3">"{cvData.personalInfo.aboutMe}"</p></>
+                      <p className="text-[8px] text-gray-500 italic mb-3 line-clamp-3">"{cvData.personalInfo.aboutMe}"</p></>
                   )}
                   {cvData.workExperience.length > 0 && (
                     <><div className="text-[10px] font-bold text-[#2c3e50] uppercase border-b-2 border-[#ecf0f1] pb-1 mb-2">Experience</div>
-                    {cvData.workExperience.slice(0, 2).map((exp, i) => (
-                      <div key={i} className="mb-2">
-                        <div className="flex justify-between"><span className="text-[9px] font-bold text-[#34495e]">{exp.occupation}</span><span className="text-[8px] text-[#1abc9c] font-semibold">{exp.from}-{exp.to}</span></div>
-                        <div className="text-[8px] italic text-[#7f8c8d]">{exp.employer}</div>
-                      </div>
-                    ))}</>
+                      {cvData.workExperience.slice(0, 2).map((exp, i) => (
+                        <div key={i} className="mb-2">
+                          <div className="flex justify-between"><span className="text-[9px] font-bold text-[#34495e]">{exp.occupation}</span><span className="text-[8px] text-[#1abc9c] font-semibold">{exp.from}-{exp.to}</span></div>
+                          <div className="text-[8px] italic text-[#7f8c8d]">{exp.employer}</div>
+                        </div>
+                      ))}</>
                   )}
                   {cvData.education.length > 0 && (
                     <><div className="text-[10px] font-bold text-[#2c3e50] uppercase border-b-2 border-[#ecf0f1] pb-1 mb-2 mt-3">Education</div>
-                    {cvData.education.slice(0, 2).map((edu, i) => (
-                      <div key={i} className="mb-2">
-                        <div className="flex justify-between"><span className="text-[9px] font-bold text-[#34495e]">{edu.qualification}</span><span className="text-[8px] text-[#1abc9c] font-semibold">{edu.from}-{edu.to}</span></div>
-                        <div className="text-[8px] italic text-[#7f8c8d]">{edu.organization}</div>
-                      </div>
-                    ))}</>
+                      {cvData.education.slice(0, 2).map((edu, i) => (
+                        <div key={i} className="mb-2">
+                          <div className="flex justify-between"><span className="text-[9px] font-bold text-[#34495e]">{edu.qualification}</span><span className="text-[8px] text-[#1abc9c] font-semibold">{edu.from}-{edu.to}</span></div>
+                          <div className="text-[8px] italic text-[#7f8c8d]">{edu.organization}</div>
+                        </div>
+                      ))}</>
                   )}
                   {cvData.certificates.length > 0 && (
                     <><div className="text-[10px] font-bold text-[#2c3e50] uppercase border-b-2 border-[#ecf0f1] pb-1 mb-2 mt-3">Certifications</div>
-                    {cvData.certificates.slice(0, 2).map((cert, i) => (
-                      <div key={i} className="mb-1"><span className="text-[9px] font-bold text-[#34495e]">{cert.title}</span><span className="text-[8px] text-[#7f8c8d] ml-1">— {cert.issuer}</span></div>
-                    ))}</>
+                      {cvData.certificates.slice(0, 2).map((cert, i) => (
+                        <div key={i} className="mb-1"><span className="text-[9px] font-bold text-[#34495e]">{cert.title}</span><span className="text-[8px] text-[#7f8c8d] ml-1">— {cert.issuer}</span></div>
+                      ))}</>
                   )}
                 </div>
               </div>
@@ -1112,7 +1112,7 @@ const CVBuilder = ({ initialData }) => {
                 )}
                 {cvData.digitalSkills.length > 0 && (
                   <div><div className="text-[9px] font-bold uppercase tracking-[2px] text-gray-900 mb-2">Skills</div>
-                  <div className="text-[8px] text-gray-600">{cvData.digitalSkills.join(' · ')}</div></div>
+                    <div className="text-[8px] text-gray-600">{cvData.digitalSkills.join(' · ')}</div></div>
                 )}
               </div>
             ) : cvData.cvFormat === 'plain' ? (
@@ -1185,31 +1185,31 @@ const CVBuilder = ({ initialData }) => {
                 <div className="w-[65%] p-4 bg-white text-gray-800">
                   {cvData.personalInfo.aboutMe && (
                     <><div className="text-[10px] font-bold uppercase tracking-wider mb-2 border-b-2 border-gray-100 pb-1" style={{ color: cvData.themeColor || '#0e4a8e' }}>Profile</div>
-                    <p className="text-[8px] text-gray-500 italic mb-3 line-clamp-3">"{cvData.personalInfo.aboutMe}"</p></>
+                      <p className="text-[8px] text-gray-500 italic mb-3 line-clamp-3">"{cvData.personalInfo.aboutMe}"</p></>
                   )}
                   {cvData.workExperience.length > 0 && (
                     <><div className="text-[10px] font-bold uppercase tracking-wider mb-2 border-b-2 border-gray-100 pb-1 mt-2" style={{ color: cvData.themeColor || '#0e4a8e' }}>Experience</div>
-                    {cvData.workExperience.slice(0, 2).map((exp, i) => (
-                      <div key={i} className="mb-2">
-                        <div className="flex justify-between"><span className="text-[9px] font-bold text-gray-700">{exp.occupation}</span><span className="text-[8px] font-semibold" style={{ color: cvData.themeColor || '#0e4a8e' }}>{exp.from}-{exp.to}</span></div>
-                        <div className="text-[8px] italic text-gray-500">{exp.employer}</div>
-                      </div>
-                    ))}</>
+                      {cvData.workExperience.slice(0, 2).map((exp, i) => (
+                        <div key={i} className="mb-2">
+                          <div className="flex justify-between"><span className="text-[9px] font-bold text-gray-700">{exp.occupation}</span><span className="text-[8px] font-semibold" style={{ color: cvData.themeColor || '#0e4a8e' }}>{exp.from}-{exp.to}</span></div>
+                          <div className="text-[8px] italic text-gray-500">{exp.employer}</div>
+                        </div>
+                      ))}</>
                   )}
                   {cvData.education.length > 0 && (
                     <><div className="text-[10px] font-bold uppercase tracking-wider mb-2 border-b-2 border-gray-100 pb-1 mt-2" style={{ color: cvData.themeColor || '#0e4a8e' }}>Education</div>
-                    {cvData.education.slice(0, 2).map((edu, i) => (
-                      <div key={i} className="mb-2">
-                        <div className="flex justify-between"><span className="text-[9px] font-bold text-gray-700">{edu.qualification}</span><span className="text-[8px] font-semibold" style={{ color: cvData.themeColor || '#0e4a8e' }}>{edu.from}-{edu.to}</span></div>
-                        <div className="text-[8px] italic text-gray-500">{edu.organization}</div>
-                      </div>
-                    ))}</>
+                      {cvData.education.slice(0, 2).map((edu, i) => (
+                        <div key={i} className="mb-2">
+                          <div className="flex justify-between"><span className="text-[9px] font-bold text-gray-700">{edu.qualification}</span><span className="text-[8px] font-semibold" style={{ color: cvData.themeColor || '#0e4a8e' }}>{edu.from}-{edu.to}</span></div>
+                          <div className="text-[8px] italic text-gray-500">{edu.organization}</div>
+                        </div>
+                      ))}</>
                   )}
                   {cvData.certificates.length > 0 && (
                     <><div className="text-[10px] font-bold uppercase tracking-wider mb-2 border-b-2 border-gray-100 pb-1 mt-2" style={{ color: cvData.themeColor || '#0e4a8e' }}>Certifications</div>
-                    {cvData.certificates.slice(0, 2).map((cert, i) => (
-                      <div key={i} className="mb-1"><span className="text-[9px] font-bold text-gray-700">{cert.title}</span><span className="text-[8px] text-gray-500 ml-1">— {cert.issuer}</span></div>
-                    ))}</>
+                      {cvData.certificates.slice(0, 2).map((cert, i) => (
+                        <div key={i} className="mb-1"><span className="text-[9px] font-bold text-gray-700">{cert.title}</span><span className="text-[8px] text-gray-500 ml-1">— {cert.issuer}</span></div>
+                      ))}</>
                   )}
                 </div>
               </div>

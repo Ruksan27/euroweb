@@ -113,24 +113,19 @@ function CVModal({ cv, token, onClose }) {
     const toastId = toast.loading('Generating PDF...');
     setDownloading(true);
     try {
-      const response = await axios.get(`${API.cv}/generate-pdf/${cv._id}?t=${Date.now()}`, {
-        responseType: 'blob',
-        timeout: 60000,
-      });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const blobUrl = URL.createObjectURL(blob);
-      const name = (cv.personalInfo?.fullName || 'CV').replace(/\s+/g, '_');
+      const downloadUrl = `${API.cv}/generate-pdf/${cv._id}?t=${Date.now()}`;
       const link = document.createElement('a');
-      link.href = blobUrl;
-      link.setAttribute('download', `${name}_Europass.pdf`);
+      link.href = downloadUrl;
+      link.setAttribute('download', '');
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-      toast.success('PDF downloaded! 🚀', { id: toastId });
-    } catch (err) {
-      toast.error('Failed to generate PDF', { id: toastId });
+
+      toast.success('PDF download started! 🚀', { id: toastId });
+    } catch (error) {
+      console.error('Download Error:', error);
+      toast.error('Failed to start PDF download', { id: toastId });
     } finally {
       setDownloading(false);
     }
@@ -369,24 +364,19 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
     const toastId = toast.loading('Generating PDF...');
     setDownloadingId(id);
     try {
-      const response = await axios.get(`${API.cv}/generate-pdf/${id}?t=${Date.now()}`, {
-        responseType: 'blob',
-        timeout: 60000,
-      });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const blobUrl = URL.createObjectURL(blob);
-      const name = (fullName || 'CV').replace(/\s+/g, '_');
+      const downloadUrl = `${API.cv}/generate-pdf/${id}?t=${Date.now()}`;
       const link = document.createElement('a');
-      link.href = blobUrl;
-      link.setAttribute('download', `${name}_Europass.pdf`);
+      link.href = downloadUrl;
+      link.setAttribute('download', '');
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-      toast.success('PDF downloaded! 🚀', { id: toastId });
-    } catch (err) {
-      toast.error('Failed to generate PDF', { id: toastId });
+
+      toast.success('PDF download started! 🚀', { id: toastId });
+    } catch (error) {
+      console.error('Download Error:', error);
+      toast.error('Failed to start PDF download', { id: toastId });
     } finally {
       setDownloadingId(null);
     }
