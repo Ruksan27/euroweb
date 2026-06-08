@@ -83,7 +83,7 @@ const Dashboard = ({ onLogout, onEditCV }) => {
     const toastId = toast.loading('Generating PDF...');
     setDownloadingId(id);
     try {
-      const response = await axios.get(`${API.cv}/generate-pdf/${id}`, {
+      const response = await axios.get(`${API.cv}/generate-pdf/${id}?t=${Date.now()}`, {
         responseType: 'blob',
         timeout: 60000,
       });

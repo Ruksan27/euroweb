@@ -236,7 +236,7 @@ const CVBuilder = ({ initialData }) => {
       };
       const extensions = { pdf: 'pdf', jpg: 'jpg', docx: 'docx' };
 
-      const fileResponse = await axios.get(`${API.cv}/generate-${type}/${savedId}`, {
+      const fileResponse = await axios.get(`${API.cv}/generate-${type}/${savedId}?t=${Date.now()}`, {
         responseType: 'blob',
         timeout: 60000,
       });

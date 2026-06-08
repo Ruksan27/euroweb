@@ -16,7 +16,7 @@ export default function CVModal({ cv, onClose }) {
     const toastId = toast.loading('Generating PDF...');
     setDownloading(true);
     try {
-      const response = await axios.get(`${API.cv}/generate-pdf/${cv._id}`, {
+      const response = await axios.get(`${API.cv}/generate-pdf/${cv._id}?t=${Date.now()}`, {
         responseType: 'blob',
         timeout: 60000,
       });

@@ -113,7 +113,7 @@ function CVModal({ cv, token, onClose }) {
     const toastId = toast.loading('Generating PDF...');
     setDownloading(true);
     try {
-      const response = await axios.get(`${API.cv}/generate-pdf/${cv._id}`, {
+      const response = await axios.get(`${API.cv}/generate-pdf/${cv._id}?t=${Date.now()}`, {
         responseType: 'blob',
         timeout: 60000,
       });
@@ -369,7 +369,7 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
     const toastId = toast.loading('Generating PDF...');
     setDownloadingId(id);
     try {
-      const response = await axios.get(`${API.cv}/generate-pdf/${id}`, {
+      const response = await axios.get(`${API.cv}/generate-pdf/${id}?t=${Date.now()}`, {
         responseType: 'blob',
         timeout: 60000,
       });
