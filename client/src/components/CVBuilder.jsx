@@ -206,15 +206,27 @@ const CVBuilder = ({ initialData }) => {
   };
 
   const downloadFile = async (type) => {
-    const id = lastSavedId || cvData._id;
-
-    if (!id) {
-      toast.error('Save the CV first before downloading');
+    if (!cvData.personalInfo.fullName?.trim()) {
+      toast.error('Please enter your full name before downloading');
+      return;
+    }
+    const token = localStorage.getItem('user_token');
+    if (!token) {
+      toast.error('Please log in to download your CV');
       return;
     }
 
+    const toastId = toast.loading('Saving & generating your file...');
     try {
-      const downloadUrl = `${API.cv}/generate-${type}/${id}`;
+      // Always save latest data before generating download
+      const saveResponse = await axios.post(`${API.cv}/save`, cvData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const savedId = saveResponse.data._id;
+      setLastSavedId(savedId);
+      setCvData(prev => ({ ...prev, _id: savedId }));
+
+      const downloadUrl = `${API.cv}/generate-${type}/${savedId}`;
       
       const link = document.createElement('a');
       link.href = downloadUrl;
@@ -224,10 +236,10 @@ const CVBuilder = ({ initialData }) => {
       link.click();
       document.body.removeChild(link);
 
-      toast.success(`Starting your ${type.toUpperCase()} download... 🚀`);
+      toast.success(`Starting your ${type.toUpperCase()} download... 🚀`, { id: toastId });
     } catch (error) {
       console.error('Download Error:', error);
-      toast.error(`Failed to download ${type.toUpperCase()}`);
+      toast.error(`Failed to download ${type.toUpperCase()}`, { id: toastId });
     }
   };
 
@@ -856,7 +868,7 @@ const CVBuilder = ({ initialData }) => {
                     <div className="flex-1">
                       <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Education and Training</h2>
                       <div className="border-b border-gray-400 w-full mb-3"></div>
-                      {cvData.education.slice(0, 3).map((edu, i) => (
+                      {cvData.education.map((edu, i) => (
                         <div key={i} className="mb-4">
                           <div className="text-[9px] text-gray-500 mb-0.5">{edu.from} {edu.city}{edu.country ? ', ' + edu.country : ''}</div>
                           <div className="text-[10px] uppercase mb-0.5"><strong>{edu.qualification}</strong> <span className="text-gray-700 capitalize">{edu.organization}</span></div>
@@ -879,7 +891,7 @@ const CVBuilder = ({ initialData }) => {
                     <div className="flex-1">
                       <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Work Experience</h2>
                       <div className="border-b border-gray-400 w-full mb-3"></div>
-                      {cvData.workExperience.slice(0, 3).map((exp, i) => (
+                      {cvData.workExperience.map((exp, i) => (
                         <div key={i} className="mb-4">
                           <div className="text-[9px] text-gray-500 mb-0.5">{exp.from} – {exp.to || 'Current'} {exp.city}{exp.country ? ', ' + exp.country : ''}</div>
                           <div className="text-[10px] uppercase mb-0.5"><strong>{exp.occupation}</strong> <span className="text-gray-700 capitalize">{exp.employer}</span></div>
@@ -904,7 +916,7 @@ const CVBuilder = ({ initialData }) => {
                     <div className="flex-1">
                       <h2 className="text-[11px] font-extrabold uppercase tracking-widest mb-1">Certifications</h2>
                       <div className="border-b border-gray-400 w-full mb-3"></div>
-                      {cvData.certificates.slice(0, 3).map((cert, i) => (
+                      {cvData.certificates.map((cert, i) => (
                         <div key={i} className="mb-4">
                           <div className="text-[9px] text-gray-500 mb-0.5">{cert.issuer} {cert.date ? '— ' + cert.date : ''}</div>
                           <div className="text-[10px] mb-1.5"><strong>{cert.title}</strong></div>
@@ -949,7 +961,7 @@ const CVBuilder = ({ initialData }) => {
                               <div className="w-[15%]">Spoken interaction</div>
                               <div className="w-[20%]"></div>
                             </div>
-                            {cvData.languages.slice(0, 3).map((l, i) => (
+                            {cvData.languages.map((l, i) => (
                               <div key={i} className="flex border-b border-gray-200 py-1.5">
                                 <div className="w-[20%] font-extrabold text-left pl-2 uppercase">{l.language}</div>
                                 <div className="w-[15%]">{l.listening || '-'}</div>
