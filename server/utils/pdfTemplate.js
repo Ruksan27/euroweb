@@ -47,26 +47,27 @@ const generateHTML = (data) => {
     // -------------------------------------------------------------------------
     css = `
       .page { font-family: "Arial", sans-serif; background-color: #ffffff; }
-      .ep-header-bg { background-color: #ffffff; padding: 40px 40px 10px 40px; }
-      .ep-body-bg { background-color: #ffffff; padding: 20px 40px 40px 40px; }
+      .ep-header-bg { background-color: #f3f4f6; padding: 30px 40px 20px 40px; }
+      .ep-body-bg { background-color: #ffffff; padding: 30px 40px 40px 40px; }
       
       .ep-row { display: flex; width: 100%; margin-bottom: 20px; position: relative; }
-      .ep-left-col { width: 140px; flex-shrink: 0; display: flex; justify-content: flex-end; padding-right: 20px; padding-top: 6px; box-sizing: border-box; }
-      .ep-right-col { flex: 1; min-width: 0; padding-left: 8px; box-sizing: border-box; }
+      .ep-left-col { width: 140px; flex-shrink: 0; display: flex; justify-content: flex-end; padding-right: 15px; padding-top: 3px; box-sizing: border-box; }
+      .ep-right-col { flex: 1; min-width: 0; padding-left: 0px; box-sizing: border-box; }
       
-      .ep-dot { width: 6px; height: 6px; background-color: #9ca3af; border-radius: 50%; }
+      .ep-dot { width: 6px; height: 6px; background-color: #6b7280; border-radius: 50%; margin-top: 2px; }
       
-      .photo-wrap img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #e5e7eb; margin-left: auto; }
-      .photo-wrap .no-photo { width: 120px; height: 120px; border-radius: 50%; background: #e5e7eb; color: #888; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 3px solid #e5e7eb; margin-left: auto; }
+      .photo-wrap img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; margin-left: auto; }
+      .photo-wrap .no-photo { width: 110px; height: 110px; border-radius: 50%; background: #e5e7eb; color: #888; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-left: auto; }
       
-      .ep-name { font-size: ${titleFontSize}; font-weight: 700; color: #4b5563; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 1px; }
+      .ep-name { font-size: 24px; font-weight: 700; color: #4b5563; margin: 0 0 10px 0; letter-spacing: 0px; }
       .ep-name-line { border-bottom: 1px solid #9ca3af; margin-bottom: 12px; }
-      .ep-contact-info { font-size: 10px; color: #111827; line-height: 1.5; font-weight: 600; }
+      .ep-contact-info { font-size: 9.5px; color: #111827; line-height: 2; font-weight: 400; }
       .ep-contact-info a { color: #2563eb; font-weight: 400; text-decoration: underline; }
       .ep-contact-info strong { color: #000; font-weight: 700; }
+      .ep-pipe { color: #9ca3af; margin: 0 6px; }
       
-      .ep-section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #000; margin-bottom: 4px; letter-spacing: 1px; }
-      .ep-section-line { border-bottom: 1px solid #9ca3af; margin-bottom: 12px; }
+      .ep-section-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: #000; margin-bottom: 4px; letter-spacing: 0.5px; }
+      .ep-section-line { border-bottom: 1px solid #9ca3af; margin-bottom: 15px; }
     `;
 
     const logoHtml = europassLogo !== 'no' ? `
@@ -85,14 +86,24 @@ const generateHTML = (data) => {
       </div>
     ` : '';
 
+    const contactsArr1 = [];
+    if (p.passportNumber) contactsArr1.push(`<strong>Passport:</strong> ${p.passportNumber}`);
+    if (p.dateOfBirth) contactsArr1.push(`<strong>Date of birth:</strong> ${p.dateOfBirth}`);
+    if (p.nationality) contactsArr1.push(`<strong>Nationality:</strong> ${p.nationality}`);
+    if (p.gender) contactsArr1.push(`<strong>Gender:</strong> ${p.gender}`);
+    
+    const contactsArr2 = [];
+    if (p.phone) contactsArr2.push(`<strong>Phone number:</strong> ${p.phone} (Mobile)`);
+    if (p.email) contactsArr2.push(`<strong>Email address:</strong> <a href="mailto:${p.email}">${p.email}</a>`);
+    
+    const contactsArr3 = [];
+    if (p.address || p.city) contactsArr3.push(`<strong>Address:</strong> ${[p.address, p.city, p.postalCode, p.country].filter(Boolean).join(', ')} (Home)`);
+    if (p.website) contactsArr3.push(`<strong>Website:</strong> <a href="${p.website.startsWith('http') ? p.website : 'https://' + p.website}" target="_blank">${p.website}</a>`);
+
     const contactsHtml = `
-      ${p.passportNumber ? `<strong>Residence permit:</strong> ${p.passportNumber} &nbsp;|&nbsp; ` : ''}
-      ${p.dateOfBirth ? `<strong>Date of birth:</strong> ${p.dateOfBirth} &nbsp;|&nbsp; ` : ''}
-      ${p.nationality ? `<strong>Nationality:</strong> ${p.nationality} &nbsp;|&nbsp; ` : ''}
-      ${p.phone ? `<strong>Phone number:</strong> ${p.phone} (Home) &nbsp;|&nbsp; ` : ''}
-      ${p.email ? `<strong>Email address:</strong> <a href="mailto:${p.email}">${p.email}</a> &nbsp;|&nbsp; ` : ''}
-      ${p.website ? `<strong>Website:</strong> <a href="${p.website.startsWith('http') ? p.website : 'https://' + p.website}" target="_blank">${p.website}</a>` : ''}
-      ${p.address || p.city ? `<br/><strong>Address:</strong> ${[p.address, p.city, p.postalCode, p.country].filter(Boolean).join(', ')} (Home)` : ''}
+      ${contactsArr1.length > 0 ? `<div style="margin-bottom: 4px;">${contactsArr1.join('<span class="ep-pipe">|</span>')}</div>` : ''}
+      ${contactsArr2.length > 0 ? `<div style="margin-bottom: 4px;">${contactsArr2.join('<span class="ep-pipe">|</span>')}</div>` : ''}
+      ${contactsArr3.length > 0 ? `<div>${contactsArr3.join('<span class="ep-pipe">|</span>')}</div>` : ''}
     `;
 
     // Implement variants changing header alignment
@@ -152,11 +163,11 @@ const generateHTML = (data) => {
             <div style="width: 140px; text-align: right; padding-right: 20px; flex-shrink: 0; box-sizing: border-box;">
               ${renderPhoto('photo-wrap')}
             </div>
-            <div class="ep-right-col" style="padding-left: 8px;">
+            <div class="ep-right-col" style="padding-left: 0px; padding-top: 10px;">
               <h1 class="ep-name">${p.fullName || 'YOUR NAME'}</h1>
               <div class="ep-name-line"></div>
               <div class="ep-contact-info">
-                ${contactsHtml.replace(/<br\/>/g, ' ')}
+                ${contactsHtml}
               </div>
             </div>
           </div>
@@ -265,8 +276,8 @@ const generateHTML = (data) => {
                   <div style="width: 15%;">Spoken interaction</div>
                   <div style="width: 20%;"></div>
                 </div>
-                ${data.languages.map(l => `
-                  <div style="display: flex; border-bottom: 1px solid #e5e7eb; padding: 6px 0;">
+                ${data.languages.map((l, index) => `
+                  <div style="display: flex; border-bottom: 1px solid #e5e7eb; padding: 6px 0; background-color: ${index % 2 === 0 ? '#f9fafb' : 'transparent'};">
                     <div style="width: 20%; font-weight: 800; text-align: left; padding-left: 8px; text-transform: uppercase;">${l.language}</div>
                     <div style="width: 15%;">${l.listening || '-'}</div>
                     <div style="width: 15%;">${l.reading || '-'}</div>
@@ -289,7 +300,7 @@ const generateHTML = (data) => {
             <div class="ep-section-title">Skills</div>
             <div class="ep-section-line"></div>
             <div style="font-size: 10px; color: #1f2937; line-height: 1.6;">
-              ${[...(data.digitalSkills || []), ...(data.otherSkills || [])].join(' | ')}
+              ${[...(data.digitalSkills || []), ...(data.otherSkills || [])].join('<span class="ep-pipe">|</span>')}
             </div>
           </div>
         </div>` : ''}
