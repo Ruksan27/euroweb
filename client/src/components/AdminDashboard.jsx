@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   LucideShield, LucideLogOut, LucideUsers, LucideFileText,
   LucideDownload, LucideTrash2, LucideEye, LucideX, LucideEdit,
@@ -106,16 +107,33 @@ export function AdminLogin({ onLogin }) {
 
 // ─── CV Detail Modal ────────────────────────────────────────────────────────────
 function CVModal({ cv, token, onClose }) {
-  const downloadPDF = () => {
-    const downloadUrl = `${API.cv}/generate-pdf/${cv._id}`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.setAttribute('download', '');
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Starting your PDF download... 🚀');
+  const [downloading, setDownloading] = useState(false);
+
+  const downloadPDF = async () => {
+    const toastId = toast.loading('Generating PDF...');
+    setDownloading(true);
+    try {
+      const response = await axios.get(`${API.cv}/generate-pdf/${cv._id}`, {
+        responseType: 'blob',
+        timeout: 60000,
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blobUrl = URL.createObjectURL(blob);
+      const name = (cv.personalInfo?.fullName || 'CV').replace(/\s+/g, '_');
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.setAttribute('download', `${name}_Europass.pdf`);
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      toast.success('PDF downloaded! 🚀', { id: toastId });
+    } catch (err) {
+      toast.error('Failed to generate PDF', { id: toastId });
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const Section = ({ icon: Icon, title, children }) => (
@@ -151,10 +169,11 @@ function CVModal({ cv, token, onClose }) {
           <div className="flex items-center gap-3">
             <button
               onClick={downloadPDF}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
+              disabled={downloading}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
             >
-              <LucideDownload size={16} />
-              Download PDF
+              {downloading ? <LucideLoader2 size={16} className="animate-spin" /> : <LucideDownload size={16} />}
+              {downloading ? 'Generating...' : 'Download PDF'}
             </button>
             <button onClick={onClose} className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/5 transition">
               <LucideX size={20} />
@@ -344,16 +363,33 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
   const [deletingId, setDeletingId] = useState(null);
   const token = localStorage.getItem('admin_token');
 
-  const handleDownload = (id) => {
-    const downloadUrl = `${API.cv}/generate-pdf/${id}`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.setAttribute('download', '');
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Starting your PDF download... 🚀');
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  const handleDownload = async (id, fullName) => {
+    const toastId = toast.loading('Generating PDF...');
+    setDownloadingId(id);
+    try {
+      const response = await axios.get(`${API.cv}/generate-pdf/${id}`, {
+        responseType: 'blob',
+        timeout: 60000,
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blobUrl = URL.createObjectURL(blob);
+      const name = (fullName || 'CV').replace(/\s+/g, '_');
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.setAttribute('download', `${name}_Europass.pdf`);
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      toast.success('PDF downloaded! 🚀', { id: toastId });
+    } catch (err) {
+      toast.error('Failed to generate PDF', { id: toastId });
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   const fetchCVs = async () => {
@@ -552,8 +588,8 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
                       <button onClick={() => onEditCV && onEditCV(cv)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition text-xs font-medium">
                         <LucideEdit size={14} /> Edit
                       </button>
-                      <button onClick={() => handleDownload(cv._id)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition text-xs font-medium">
-                        <LucideDownload size={14} /> PDF
+                      <button onClick={() => handleDownload(cv._id, cv.personalInfo?.fullName)} disabled={downloadingId === cv._id} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition text-xs font-medium disabled:opacity-50">
+                        {downloadingId === cv._id ? <LucideLoader2 size={14} className="animate-spin" /> : <LucideDownload size={14} />} PDF
                       </button>
                       <button onClick={() => handleDelete(cv._id)} disabled={deletingId === cv._id} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition text-xs font-medium disabled:opacity-50">
                         {deletingId === cv._id ? <LucideLoader2 size={14} className="animate-spin" /> : <LucideTrash2 size={14} />} Del
@@ -609,8 +645,8 @@ export default function AdminDashboard({ onLogout, onEditCV }) {
                               <button onClick={() => onEditCV && onEditCV(cv)} className="p-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 transition" title="Edit">
                                 <LucideEdit size={15} />
                               </button>
-                              <button onClick={() => handleDownload(cv._id)} className="p-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition" title="PDF">
-                                <LucideDownload size={15} />
+                              <button onClick={() => handleDownload(cv._id, cv.personalInfo?.fullName)} disabled={downloadingId === cv._id} className="p-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 transition disabled:opacity-50" title="PDF">
+                                {downloadingId === cv._id ? <LucideLoader2 size={15} className="animate-spin" /> : <LucideDownload size={15} />}
                               </button>
                               <button onClick={() => handleDelete(cv._id)} disabled={deletingId === cv._id} className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 transition disabled:opacity-50" title="Delete">
                                 {deletingId === cv._id ? <LucideLoader2 size={15} className="animate-spin" /> : <LucideTrash2 size={15} />}

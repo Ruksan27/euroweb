@@ -218,7 +218,7 @@ const CVBuilder = ({ initialData }) => {
 
     const toastId = toast.loading('Saving & generating your file...');
     try {
-      // Always save latest data before generating download
+      // Step 1: Save the latest CV data to DB
       const saveResponse = await axios.post(`${API.cv}/save`, cvData, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -226,17 +226,35 @@ const CVBuilder = ({ initialData }) => {
       setLastSavedId(savedId);
       setCvData(prev => ({ ...prev, _id: savedId }));
 
-      const downloadUrl = `${API.cv}/generate-${type}/${savedId}`;
-      
+      toast.loading(`Generating ${type.toUpperCase()}...`, { id: toastId });
+
+      // Step 2: Fetch the generated file as a blob (ensures request fires AFTER save is committed)
+      const mimeTypes = {
+        pdf: 'application/pdf',
+        jpg: 'image/jpeg',
+        docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      };
+      const extensions = { pdf: 'pdf', jpg: 'jpg', docx: 'docx' };
+
+      const fileResponse = await axios.get(`${API.cv}/generate-${type}/${savedId}`, {
+        responseType: 'blob',
+        timeout: 60000,
+      });
+
+      // Step 3: Trigger browser download from the blob
+      const blob = new Blob([fileResponse.data], { type: mimeTypes[type] || 'application/octet-stream' });
+      const blobUrl = URL.createObjectURL(blob);
+      const name = (cvData.personalInfo.fullName || 'CV').replace(/\s+/g, '_');
       const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.setAttribute('download', '');
+      link.href = blobUrl;
+      link.setAttribute('download', `${name}_Europass.${extensions[type] || type}`);
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
 
-      toast.success(`Starting your ${type.toUpperCase()} download... 🚀`, { id: toastId });
+      toast.success(`${type.toUpperCase()} downloaded successfully! 🚀`, { id: toastId });
     } catch (error) {
       console.error('Download Error:', error);
       toast.error(`Failed to download ${type.toUpperCase()}`, { id: toastId });

@@ -1,24 +1,42 @@
 import React from 'react';
+import axios from 'axios';
 import {
   LucideUsers, LucideDownload, LucideX, LucideMail, LucidePhone,
   LucideCalendar, LucideBriefcase, LucideGraduationCap, LucideCode2,
   LucideGlobe, LucideLink, LucideAward, LucideFileText, LucideMapPin,
-  LucideShield
+  LucideShield, LucideLoader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { API } from '../config/api';
 
 export default function CVModal({ cv, onClose }) {
-  const downloadPDF = () => {
-    const downloadUrl = `${API.cv}/generate-pdf/${cv._id}`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.setAttribute('download', '');
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Starting your PDF download... 🚀');
+  const [downloading, setDownloading] = React.useState(false);
+
+  const downloadPDF = async () => {
+    const toastId = toast.loading('Generating PDF...');
+    setDownloading(true);
+    try {
+      const response = await axios.get(`${API.cv}/generate-pdf/${cv._id}`, {
+        responseType: 'blob',
+        timeout: 60000,
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blobUrl = URL.createObjectURL(blob);
+      const name = (cv.personalInfo?.fullName || 'CV').replace(/\s+/g, '_');
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.setAttribute('download', `${name}_Europass.pdf`);
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      toast.success('PDF downloaded! 🚀', { id: toastId });
+    } catch (err) {
+      toast.error('Failed to generate PDF', { id: toastId });
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const Section = ({ icon: Icon, title, children }) => (
@@ -54,10 +72,11 @@ export default function CVModal({ cv, onClose }) {
           <div className="flex items-center gap-3">
             <button
               onClick={downloadPDF}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
+              disabled={downloading}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
             >
-              <LucideDownload size={16} />
-              Download PDF
+              {downloading ? <LucideLoader2 size={16} className="animate-spin" /> : <LucideDownload size={16} />}
+              {downloading ? 'Generating...' : 'Download PDF'}
             </button>
             <button onClick={onClose} className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/5 transition">
               <LucideX size={20} />

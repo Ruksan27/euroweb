@@ -77,16 +77,33 @@ const Dashboard = ({ onLogout, onEditCV }) => {
     }
   };
 
-  const handleDownload = (id) => {
-    const downloadUrl = `${API.cv}/generate-pdf/${id}`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.setAttribute('download', '');
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Starting your PDF download... 🚀');
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  const handleDownload = async (id, fullName) => {
+    const toastId = toast.loading('Generating PDF...');
+    setDownloadingId(id);
+    try {
+      const response = await axios.get(`${API.cv}/generate-pdf/${id}`, {
+        responseType: 'blob',
+        timeout: 60000,
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blobUrl = URL.createObjectURL(blob);
+      const name = (fullName || 'CV').replace(/\s+/g, '_');
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.setAttribute('download', `${name}_Europass.pdf`);
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      toast.success('PDF downloaded! 🚀', { id: toastId });
+    } catch (err) {
+      toast.error('Failed to generate PDF', { id: toastId });
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   const handleDeletePersonal = async (id) => {
@@ -371,10 +388,12 @@ const Dashboard = ({ onLogout, onEditCV }) => {
                         Edit
                       </button>
                       <button 
-                        onClick={() => handleDownload(cv._id)}
-                        className="flex items-center gap-1 text-primary-400 hover:text-primary-300 font-medium text-sm transition-transform hover:scale-105 active:scale-95"
+                        onClick={() => handleDownload(cv._id, cv.personalInfo?.fullName)}
+                        disabled={downloadingId === cv._id}
+                        className="flex items-center gap-1 text-primary-400 hover:text-primary-300 font-medium text-sm transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
                       >
-                        <LucideDownload size={16} /> Download
+                        {downloadingId === cv._id ? <LucideLoader2 size={16} className="animate-spin" /> : <LucideDownload size={16} />}
+                        {downloadingId === cv._id ? 'Generating...' : 'Download'}
                       </button>
                     </div>
                   </div>
