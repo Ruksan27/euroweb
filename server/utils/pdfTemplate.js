@@ -42,158 +42,268 @@ const generateHTML = (data) => {
   }
 
   if (format === 'europass') {
+    // -------------------------------------------------------------------------
+    // EUROPASS CLASSIC TEMPLATE
+    // -------------------------------------------------------------------------
     css = `
-      .section-dot { width: 10px; height: 10px; background-color: #9ca3af; border-radius: 50%; display: inline-block; }
-      body { -webkit-print-color-adjust: exact; }
+      .page { font-family: "Arial", sans-serif; background-color: #ffffff; }
+      .ep-header-bg { background-color: #f3f4f6; padding: 30px 40px 20px 40px; }
+      .ep-body-bg { background-color: #ffffff; padding: 30px 40px 40px 40px; }
+      
+      .ep-row { display: flex; width: 100%; margin-bottom: 20px; position: relative; }
+      .ep-left-col { width: 140px; flex-shrink: 0; display: flex; justify-content: flex-end; padding-right: 15px; padding-top: 3px; box-sizing: border-box; }
+      .ep-right-col { flex: 1; min-width: 0; padding-left: 0px; box-sizing: border-box; }
+      
+      .ep-dot { width: 6px; height: 6px; background-color: #6b7280; border-radius: 50%; margin-top: 2px; }
+      
+      .photo-wrap img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; margin-left: auto; }
+      .photo-wrap .no-photo { width: 110px; height: 110px; border-radius: 50%; background: #e5e7eb; color: #888; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-left: auto; }
+      
+      .ep-name { font-size: 24px; font-weight: 700; color: #4b5563; margin: 0 0 10px 0; letter-spacing: 0px; }
+      .ep-name-line { border-bottom: 1px solid #9ca3af; margin-bottom: 12px; }
+      .ep-contact-info { font-size: 9.5px; color: #111827; line-height: 2; font-weight: 400; }
+      .ep-contact-info a { color: #2563eb; font-weight: 400; text-decoration: underline; }
+      .ep-contact-info strong { color: #000; font-weight: 700; }
+      .ep-pipe { color: #9ca3af; margin: 0 6px; }
+      
+      .ep-section-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: #000; margin-bottom: 4px; letter-spacing: 0.5px; }
+      .ep-section-line { border-bottom: 1px solid #9ca3af; margin-bottom: 15px; }
     `;
 
-    bodyContent = `
-      <div class="bg-white p-8 md:p-12 print-area w-full max-w-[210mm] min-h-[297mm] text-gray-800">
-          
-          ${data.europassLogo !== 'no' ? `
-          <div class="flex justify-end mb-6">
-              <div class="flex items-center gap-2">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Flag_of_Europe.svg" alt="EU" class="w-12 border">
-                  <span class="text-3xl font-bold text-[#0f3a8b] tracking-wider">europass</span>
+    const logoHtml = europassLogo !== 'no' ? `
+      <div style="text-align: right; margin-bottom: 20px; display: flex; justify-content: flex-end; align-items: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" style="height: 35px; margin-right: 8px;">
+          <rect width="120" height="80" fill="#034ea2"/>
+          <!-- Simplified stars approximation for SVG footprint -->
+          <circle cx="60" cy="15" r="3" fill="#ffcc00"/><circle cx="60" cy="65" r="3" fill="#ffcc00"/>
+          <circle cx="35" cy="40" r="3" fill="#ffcc00"/><circle cx="85" cy="40" r="3" fill="#ffcc00"/>
+          <circle cx="42" cy="22" r="3" fill="#ffcc00"/><circle cx="78" cy="58" r="3" fill="#ffcc00"/>
+          <circle cx="78" cy="22" r="3" fill="#ffcc00"/><circle cx="42" cy="58" r="3" fill="#ffcc00"/>
+          <circle cx="37" cy="30" r="3" fill="#ffcc00"/><circle cx="83" cy="50" r="3" fill="#ffcc00"/>
+          <circle cx="83" cy="30" r="3" fill="#ffcc00"/><circle cx="37" cy="50" r="3" fill="#ffcc00"/>
+        </svg>
+        <span style="font-size: 32px; font-weight: 400; color: #5c2d91; font-family: 'Arial', sans-serif; letter-spacing: -1px;">europass</span>
+      </div>
+    ` : '';
+
+    const contactsArr1 = [];
+    if (p.passportNumber) contactsArr1.push(`<strong>Passport:</strong> ${p.passportNumber}`);
+    if (p.dateOfBirth) contactsArr1.push(`<strong>Date of birth:</strong> ${p.dateOfBirth}`);
+    if (p.nationality) contactsArr1.push(`<strong>Nationality:</strong> ${p.nationality}`);
+    if (p.gender) contactsArr1.push(`<strong>Gender:</strong> ${p.gender}`);
+    
+    const contactsArr2 = [];
+    if (p.phone) contactsArr2.push(`<strong>Phone number:</strong> ${p.phone} (Mobile)`);
+    if (p.email) contactsArr2.push(`<strong>Email address:</strong> <a href="mailto:${p.email}">${p.email}</a>`);
+    
+    const contactsArr3 = [];
+    if (p.address || p.city) contactsArr3.push(`<strong>Address:</strong> ${[p.address, p.city, p.postalCode, p.country].filter(Boolean).join(', ')} (Home)`);
+    if (p.website) contactsArr3.push(`<strong>Website:</strong> <a href="${p.website.startsWith('http') ? p.website : 'https://' + p.website}" target="_blank">${p.website}</a>`);
+
+    const contactsHtml = `
+      ${contactsArr1.length > 0 ? `<div style="margin-bottom: 4px;">${contactsArr1.join('<span class="ep-pipe">|</span>')}</div>` : ''}
+      ${contactsArr2.length > 0 ? `<div style="margin-bottom: 4px;">${contactsArr2.join('<span class="ep-pipe">|</span>')}</div>` : ''}
+      ${contactsArr3.length > 0 ? `<div>${contactsArr3.join('<span class="ep-pipe">|</span>')}</div>` : ''}
+    `;
+
+    // Implement variants changing header alignment
+    let headerHtml = '';
+
+    if (europassVariant === 'v2') {
+      headerHtml = `
+        <div class="ep-header-bg">
+          ${logoHtml}
+          <div class="ep-row" style="display: flex; flex-direction: row-reverse; margin-bottom: 0;">
+            <div style="width: 140px; text-align: left; padding-left: 16px;">
+              ${renderPhoto('photo-wrap')}
+            </div>
+            <div class="ep-right-col" style="text-align: right; padding-right: 16px;">
+              <h1 class="ep-name" style="text-align: right;">${p.fullName || 'YOUR NAME'}</h1>
+              <div class="ep-name-line" style="margin-left: auto;"></div>
+              <div class="ep-contact-info" style="text-align: right;">
+                ${contactsHtml.replace(/<br\/>/g, ' ')}
               </div>
+            </div>
           </div>
-          ` : ''}
-
-          <header class="flex flex-col md:flex-row gap-6 border-b pb-6 mb-6">
-              <div class="w-32 h-32 bg-gray-200 rounded-full overflow-hidden shrink-0 border-2 border-gray-300">
-                  <img src="${data.photoUrl || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}" alt="Profile" class="w-full h-full object-cover">
+        </div>
+      `;
+    } else if (europassVariant === 'v3') {
+      headerHtml = `
+        <div class="ep-header-bg" style="text-align: center;">
+          ${logoHtml.replace('justify-content: flex-end', 'justify-content: center')}
+          <div style="display: flex; justify-content: center; margin-bottom: 15px;">
+            ${renderPhoto('photo-wrap')}
+          </div>
+          <h1 class="ep-name" style="text-align: center;">${p.fullName || 'YOUR NAME'}</h1>
+          <div class="ep-name-line" style="width: 50%; margin: 0 auto 12px auto;"></div>
+          <div class="ep-contact-info" style="text-align: center;">
+            ${contactsHtml}
+          </div>
+        </div>
+      `;
+    } else if (europassVariant === 'v4') {
+      headerHtml = `
+        <div class="ep-header-bg" style="text-align: center;">
+          ${logoHtml.replace('justify-content: flex-end', 'justify-content: center')}
+          <div>
+            <h1 class="ep-name">${p.fullName || 'YOUR NAME'}</h1>
+            <div class="ep-name-line" style="width: 50%; margin: 0 auto 12px auto;"></div>
+            <div class="ep-contact-info">
+              ${contactsHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      // Default (Layout 1)
+      headerHtml = `
+        <div class="ep-header-bg">
+          ${logoHtml}
+          <div class="ep-row" style="margin-bottom: 0;">
+            <div style="width: 140px; text-align: right; padding-right: 20px; flex-shrink: 0; box-sizing: border-box;">
+              ${renderPhoto('photo-wrap')}
+            </div>
+            <div class="ep-right-col" style="padding-left: 0px; padding-top: 10px;">
+              <h1 class="ep-name">${p.fullName || 'YOUR NAME'}</h1>
+              <div class="ep-name-line"></div>
+              <div class="ep-contact-info">
+                ${contactsHtml}
               </div>
-              <div class="flex-1">
-                  <h1 class="text-4xl font-bold text-[#0f3a8b] border-b pb-2 mb-2">${p.fullName || 'YOUR NAME'}</h1>
-                  <div class="text-sm text-gray-700 space-y-1.5 leading-relaxed">
-                      <p>
-                          ${p.passportNumber ? `<span class="font-bold">Passport:</span> <span>${p.passportNumber}</span> | ` : ''}
-                          ${p.dateOfBirth ? `<span class="font-bold">Date of birth:</span> <span>${p.dateOfBirth}</span> | ` : ''}
-                          ${p.nationality ? `<span class="font-bold">Nationality:</span> <span>${p.nationality}</span> | ` : ''}
-                          ${p.gender ? `<span class="font-bold">Gender:</span> <span>${p.gender}</span>` : ''}
-                      </p>
-                      ${p.phone ? `<p><span class="font-bold">Phone number:</span> <span>${p.phone}</span></p>` : ''}
-                      ${p.email ? `<p><span class="font-bold">Email address:</span> <a href="mailto:${p.email}" class="text-blue-600 hover:underline">${p.email}</a></p>` : ''}
-                      ${(p.address || p.city) ? `<p><span class="font-bold">Address:</span> <span>${[p.address, p.city, p.postalCode, p.country].filter(Boolean).join(', ')}</span></p>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    bodyContent = `
+      ${headerHtml}
+      
+      <div class="ep-body-bg">
+        
+        ${p.aboutMe ? `
+        <div class="ep-row">
+          <div class="ep-left-col"><div class="ep-dot"></div></div>
+          <div class="ep-right-col">
+            <div class="ep-section-title">About Me</div>
+            <div class="ep-section-line"></div>
+            <div style="font-size: 10px; color: #1f2937; line-height: 1.6; text-align: justify;">${p.aboutMe}</div>
+          </div>
+        </div>` : ''}
+
+        ${(data.education && data.education.length > 0) ? `
+        <div class="ep-row">
+          <div class="ep-left-col"><div class="ep-dot"></div></div>
+          <div class="ep-right-col">
+            <div class="ep-section-title">Education and Training</div>
+            <div class="ep-section-line"></div>
+            ${data.education.map(edu => `
+              <div style="margin-bottom: 16px;">
+                <div style="font-size: 9px; color: #6b7280; margin-bottom: 2px;">${edu.from} - ${edu.to || ''} ${edu.city}${edu.country ? ', ' + edu.country : ''}</div>
+                <div style="font-size: 10px; margin-bottom: 2px;"><strong>${(edu.qualification || '').toUpperCase()}</strong> <span style="color: #374151; text-transform: capitalize;">${edu.organization}</span></div>
+                <div style="border-bottom: 1px solid #e5e7eb; width: 100%; margin-bottom: 6px;"></div>
+                <div style="font-size: 9px; color: #1f2937;">
+                  <strong>Field of study</strong> ${edu.fieldOfStudy || 'General'} <span style="margin: 0 4px; color: #9ca3af;">|</span> <strong>Level in EQF</strong> ${edu.eqfLevel || 'N/A'}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>` : ''}
+
+        ${(data.workExperience && data.workExperience.length > 0) ? `
+        <div class="ep-row">
+          <div class="ep-left-col"><div class="ep-dot"></div></div>
+          <div class="ep-right-col">
+            <div class="ep-section-title">Work Experience</div>
+            <div class="ep-section-line"></div>
+            ${data.workExperience.map(exp => `
+              <div style="margin-bottom: 16px;">
+                <div style="font-size: 9px; color: #6b7280; margin-bottom: 2px;">${exp.from} – ${exp.to || 'Current'} ${exp.city}${exp.country ? ', ' + exp.country : ''}</div>
+                <div style="font-size: 10px; margin-bottom: 2px;"><strong>${(exp.occupation || '').toUpperCase()}</strong> <span style="color: #374151; text-transform: capitalize;">${exp.employer}</span></div>
+                <div style="border-bottom: 1px solid #e5e7eb; width: 100%; margin-bottom: 6px;"></div>
+                ${exp.responsibilities?.length > 0 ? `
+                  <ul style="font-size: 9px; color: #1f2937; padding-left: 12px; margin-top: 4px; list-style-type: disc;">
+                    ${exp.responsibilities.filter(Boolean).map(resp => `<li style="margin-bottom: 2px;">${resp}</li>`).join('')}
+                  </ul>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>` : ''}
+
+        ${(data.certificates && data.certificates.length > 0) ? `
+        <div class="ep-row">
+          <div class="ep-left-col"><div class="ep-dot"></div></div>
+          <div class="ep-right-col">
+            <div class="ep-section-title">Certifications</div>
+            <div class="ep-section-line"></div>
+            ${data.certificates.map(cert => `
+              <div style="margin-bottom: 16px;">
+                <div style="font-size: 9px; color: #6b7280; margin-bottom: 2px;">${cert.issuer} ${cert.date ? '— ' + cert.date : ''}</div>
+                <div style="font-size: 10px; margin-bottom: 6px;"><strong>${cert.title}</strong></div>
+                <div style="font-size: 9px; color: #1f2937;"><strong>Mode of learning:</strong> Project based</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>` : ''}
+
+        ${(p.motherTongue || (data.languages && data.languages.length > 0)) ? `
+        <div class="ep-row">
+          <div class="ep-left-col"><div class="ep-dot"></div></div>
+          <div class="ep-right-col">
+            <div class="ep-section-title">Language Skills</div>
+            <div class="ep-section-line"></div>
+            
+            ${p.motherTongue ? `
+            <div style="font-size: 10px; margin-bottom: 12px;">
+              Mother tongue(s): <strong style="text-transform: uppercase; margin-left: 8px;">${p.motherTongue}</strong>
+            </div>` : ''}
+            
+            ${(data.languages && data.languages.length > 0) ? `
+            <div style="margin-bottom: 8px;">
+              <div style="font-size: 10px; margin-bottom: 8px;">Other language(s):</div>
+              <div style="width: 100%; font-size: 9px; text-align: center;">
+                <div style="display: flex; font-weight: bold; margin-bottom: 4px;">
+                  <div style="width: 20%;"></div>
+                  <div style="width: 30%; text-transform: uppercase;">Understanding</div>
+                  <div style="width: 30%; text-transform: uppercase;">Speaking</div>
+                  <div style="width: 20%; text-transform: uppercase;">Writing</div>
+                </div>
+                <div style="display: flex; font-size: 8px; color: #1f2937; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; padding: 4px 0;">
+                  <div style="width: 20%;"></div>
+                  <div style="width: 15%;">Listening</div>
+                  <div style="width: 15%;">Reading</div>
+                  <div style="width: 15%;">Spoken production</div>
+                  <div style="width: 15%;">Spoken interaction</div>
+                  <div style="width: 20%;"></div>
+                </div>
+                ${data.languages.map((l, index) => `
+                  <div style="display: flex; border-bottom: 1px solid #e5e7eb; padding: 6px 0; background-color: ${index % 2 === 0 ? '#f9fafb' : 'transparent'};">
+                    <div style="width: 20%; font-weight: 800; text-align: left; padding-left: 8px; text-transform: uppercase;">${l.language}</div>
+                    <div style="width: 15%;">${l.listening || '-'}</div>
+                    <div style="width: 15%;">${l.reading || '-'}</div>
+                    <div style="width: 15%;">${l.spokenProduction || '-'}</div>
+                    <div style="width: 15%;">${l.spokenInteraction || '-'}</div>
+                    <div style="width: 20%;">${l.writing || '-'}</div>
                   </div>
+                `).join('')}
               </div>
-          </header>
+              <div style="font-size: 8px; color: #6b7280; font-style: italic; margin-top: 8px;">Levels: A1 and A2: Basic user; B1 and B2: Independent user; C1 and C2: Proficient user</div>
+            </div>
+            ` : ''}
+          </div>
+        </div>` : ''}
 
-          ${p.aboutMe ? `
-          <section class="mb-6">
-              <h2 class="text-lg font-bold text-gray-900 uppercase flex items-center gap-3 border-b pb-1 mb-2">
-                  <span class="section-dot"></span> ABOUT ME
-              </h2>
-              <p class="text-sm text-gray-800 text-justify">${p.aboutMe.replace(/\n/g, '<br/>')}</p>
-          </section>
-          ` : ''}
-
-          ${(data.education && data.education.length > 0) ? `
-          <section class="mb-6">
-              <h2 class="text-lg font-bold text-gray-900 uppercase flex items-center gap-3 border-b pb-1 mb-2">
-                  <span class="section-dot"></span> EDUCATION AND TRAINING
-              </h2>
-              ${data.education.map(edu => `
-              <div class="pl-5 mb-4">
-                  <p class="text-xs text-gray-500 italic">${edu.from} - ${edu.to || ''} ${edu.city}${edu.country ? ', ' + edu.country : ''}</p>
-                  <h3 class="font-bold text-gray-800 mt-1 uppercase">${edu.qualification}</h3>
-                  <p class="text-sm text-gray-800 mt-1">
-                      <span class="font-bold">Field of study:</span> <span>${edu.fieldOfStudy || 'General'}</span> | 
-                      <span class="font-bold">Level in EQF:</span> <span>${edu.eqfLevel || 'N/A'}</span>
-                  </p>
-              </div>
-              `).join('')}
-          </section>
-          ` : ''}
-
-          ${(p.motherTongue || (data.languages && data.languages.length > 0)) ? `
-          <section class="mb-6">
-              <h2 class="text-lg font-bold text-gray-900 uppercase flex items-center gap-3 border-b pb-1 mb-2">
-                  <span class="section-dot"></span> LANGUAGE SKILLS
-              </h2>
-              <div class="pl-5">
-                  ${p.motherTongue ? `<p class="text-sm text-gray-800 mb-2"><span class="font-bold">Mother tongue(s):</span> <span class="font-bold uppercase">${p.motherTongue}</span></p>` : ''}
-                  
-                  ${(data.languages && data.languages.length > 0) ? `
-                  <div class="mt-4">
-                      <p class="text-sm text-gray-800 font-bold mb-2">Other language(s):</p>
-                      <div class="w-full text-sm">
-                          <div class="flex font-bold border-b pb-2 mb-2 text-xs uppercase text-gray-600">
-                              <div class="w-1/4"></div>
-                              <div class="w-1/4 text-center">Understanding</div>
-                              <div class="w-1/4 text-center">Speaking</div>
-                              <div class="w-1/4 text-center">Writing</div>
-                          </div>
-                          <div class="flex text-xs text-gray-500 border-b pb-2 mb-2">
-                              <div class="w-1/4"></div>
-                              <div class="w-[12.5%] text-center">Listening</div>
-                              <div class="w-[12.5%] text-center">Reading</div>
-                              <div class="w-[12.5%] text-center">Spoken prod.</div>
-                              <div class="w-[12.5%] text-center">Spoken int.</div>
-                              <div class="w-1/4"></div>
-                          </div>
-                          ${data.languages.map((l, index) => `
-                          <div class="flex py-2 border-b ${index % 2 === 0 ? 'bg-gray-50' : ''}">
-                              <div class="w-1/4 font-bold pl-2 uppercase">${l.language}</div>
-                              <div class="w-[12.5%] text-center">${l.listening || '-'}</div>
-                              <div class="w-[12.5%] text-center">${l.reading || '-'}</div>
-                              <div class="w-[12.5%] text-center">${l.spokenProduction || '-'}</div>
-                              <div class="w-[12.5%] text-center">${l.spokenInteraction || '-'}</div>
-                              <div class="w-1/4 text-center">${l.writing || '-'}</div>
-                          </div>
-                          `).join('')}
-                      </div>
-                  </div>
-                  ` : ''}
-              </div>
-          </section>
-          ` : ''}
-
-          ${(data.digitalSkills?.length > 0 || data.otherSkills?.length > 0) ? `
-          <section class="mb-6">
-              <h2 class="text-lg font-bold text-gray-900 uppercase flex items-center gap-3 border-b pb-1 mb-2">
-                  <span class="section-dot"></span> SKILLS
-              </h2>
-              <div class="pl-5">
-                  <p class="text-sm text-gray-800 leading-relaxed">${[...(data.digitalSkills || []), ...(data.otherSkills || [])].join(' | ')}</p>
-              </div>
-          </section>
-          ` : ''}
-
-          ${(data.workExperience && data.workExperience.length > 0) ? `
-          <section class="mb-6">
-              <h2 class="text-lg font-bold text-gray-900 uppercase flex items-center gap-3 border-b pb-1 mb-2">
-                  <span class="section-dot"></span> WORK EXPERIENCE
-              </h2>
-              <div class="pl-5 mt-2">
-                  ${data.workExperience.map(exp => `
-                  <div class="mb-4">
-                      <h3 class="font-bold text-gray-800 uppercase">${exp.occupation} <span class="text-xs font-normal text-gray-600 ml-2 uppercase">– ${exp.from} – ${exp.to || 'Current'} – ${exp.city}${exp.country ? ', ' + exp.country : ''}</span></h3>
-                      ${exp.responsibilities?.length > 0 ? `
-                      <ul class="list-disc ml-5 mt-2 text-sm text-gray-800 space-y-1">
-                          ${exp.responsibilities.filter(Boolean).map(resp => `<li>${resp}</li>`).join('')}
-                      </ul>
-                      ` : ''}
-                  </div>
-                  `).join('')}
-              </div>
-          </section>
-          ` : ''}
-
-          ${(data.certificates && data.certificates.length > 0) ? `
-          <section class="mb-6">
-              <h2 class="text-lg font-bold text-gray-900 uppercase flex items-center gap-3 border-b pb-1 mb-2">
-                  <span class="section-dot"></span> CERTIFICATIONS
-              </h2>
-              <div class="pl-5 mt-2">
-                  ${data.certificates.map(cert => `
-                  <div class="mb-4">
-                      <h3 class="font-bold text-gray-800 uppercase">${cert.title} <span class="text-xs font-normal text-gray-600 ml-2 uppercase">– ${cert.issuer} ${cert.date ? '(' + cert.date + ')' : ''}</span></h3>
-                  </div>
-                  `).join('')}
-              </div>
-          </section>
-          ` : ''}
+        ${(data.digitalSkills?.length > 0 || data.otherSkills?.length > 0) ? `
+        <div class="ep-row">
+          <div class="ep-left-col"><div class="ep-dot"></div></div>
+          <div class="ep-right-col">
+            <div class="ep-section-title">Skills</div>
+            <div class="ep-section-line"></div>
+            <div style="font-size: 10px; color: #1f2937; line-height: 1.6;">
+              ${[...(data.digitalSkills || []), ...(data.otherSkills || [])].join('<span class="ep-pipe">|</span>')}
+            </div>
+          </div>
+        </div>` : ''}
       </div>
     `;
   }  
@@ -676,7 +786,6 @@ const generateHTML = (data) => {
     <html>
     <head>
       <meta charset="UTF-8">
-      ${format === 'europass' ? '<script src="https://cdn.tailwindcss.com"></script>' : ''}
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Inter:wght@400;600;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -686,7 +795,7 @@ const generateHTML = (data) => {
       </style>
     </head>
     <body>
-      <div class="${format === 'europass' ? 'flex justify-center bg-white' : 'page'}" id="cv-root">
+      <div class="page" id="cv-root">
         ${bodyContent}
       </div>
     </body>
